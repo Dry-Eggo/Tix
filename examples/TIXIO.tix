@@ -1,0 +1,11 @@
+extern std_print_string(m : str);
+extern std_flush();
+extern std_print_int(n : int);
+
+
+mkf print(msg : str)
+{
+  call std_print_string(msg);
+  call std_flush();
+};
+

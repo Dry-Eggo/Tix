@@ -1,0 +1,11 @@
+bundle "TIXIO.tix" as TIXIO
+bundle "TIXMATH.tix" as TIXMATH
+
+mkf main()
+{
+  mk hello : str = "Course Repee";
+  mk ad1:int = 100;
+  mk ad2:int = 2;
+  mk num : int = TIXMATH::add(ad1, ad2);
+  TIXIO::print(hello);
+};
