@@ -1,3 +1,3 @@
-/home/dry/Documents/Eggo/Tix/bin/CMakeFiles/eggo.dir
+/home/dry/Documents/Eggo/Tix/bin/CMakeFiles/tix.dir
 /home/dry/Documents/Eggo/Tix/bin/CMakeFiles/edit_cache.dir
 /home/dry/Documents/Eggo/Tix/bin/CMakeFiles/rebuild_cache.dir

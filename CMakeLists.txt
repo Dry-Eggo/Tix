@@ -3,7 +3,7 @@ project(EGGO)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(eggo src/eggo.cpp)
+add_executable(tix src/eggo.cpp)
 set(CMAKE_CXX_STANDDARD 17)
 
-target_include_directories(eggo PUBLIC ${PROJECT_SOURCE_DIR}/headers /usr/include/c++/13 /usr/include/x86_64-linux-gnu/c++/13 /usr/include)
+target_include_directories(tix PUBLIC ${PROJECT_SOURCE_DIR}/headers /usr/include/c++/13 /usr/include/x86_64-linux-gnu/c++/13 /usr/include)

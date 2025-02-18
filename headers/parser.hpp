@@ -1,5 +1,6 @@
 #pragma once
 
+#include "_glob_symbols.hpp"
 #include "asmgen.hpp"
 #include "eggoLog.hpp"
 #include "token.hpp"
@@ -166,7 +167,6 @@ private:
   }
 
   inline void parse_mk_stmt(std::vector<NodeStmts> &stmts) {
-    int cc = 0;
     NodeStmts stmt;
     NodeMkStmt mkstmt;
     consume(); // discarding "MK" keyword
@@ -197,6 +197,11 @@ private:
             }
             stmt.var = mkstmt;
             stmts.push_back(stmt);
+          } else if (peek().has_value() && peek()->type == TokenType::SEMI) {
+            consume();
+            mkstmt.is_initialized = false;
+            stmt.var = mkstmt;
+            stmts.push_back(stmt);
           }
         }
       }
@@ -214,7 +219,8 @@ private:
 
       consume();
       if (peek().has_value() && peek().value().type == TokenType::INT_LIT ||
-          peek().value().type == TokenType::IDENT) {
+          peek().value().type == TokenType::IDENT ||
+          peek().value().type == STRING_LIT) {
         if (peek()->type == INT_LIT)
           restmt.new_value =
               std::make_shared<NodeExpr>(parse_expression(stmts));
@@ -237,6 +243,7 @@ private:
       }
     } else if (peek(1).has_value() && peek(1)->type == TokenType::OPAREN) {
       NodeFuncCall fcall;
+      fcall.ns = _Tix_current_file;
       int param_count = 0;
       fcall.identifier = consume();
       consume(); // opening parenthesis
@@ -286,7 +293,6 @@ private:
               consume();
           }
           scres.scope_member = fc;
-          Logger::Trace("%s", fc.identifier.value.value().c_str());
           stmt.var = scres;
           stmts.push_back(stmt);
           return fc;
@@ -303,8 +309,8 @@ private:
       } else {
         Logger::Trace("Missing Semi Colon");
       }
-      stmt.var = scres;
-      stmts.push_back(stmt);
+      /*stmt.var = scres;*/
+      /*stmts.push_back(stmt);*/
     } else if (peek(1).has_value()) {
       NodeStmts stmt;
       NodeReValStmt rev_stmt;
@@ -573,14 +579,14 @@ private:
 
     if (peek().has_value() && peek()->type == TokenType::INT_LIT ||
         peek().has_value() && peek()->type == TokenType::IDENT) {
-      if (peek(1).has_value() && peek(1)->type != SEMI)
-        if (peek(1)->type == SCOPE_RES) {
+      if (peek(1).has_value() && peek(1)->type != SEMI) {
+        if (peek(1)->type == SCOPE_RES || peek(1)->type == OPAREN) {
           expr.var = std::make_shared<NodeFuncCall>(
-              parse_re_assign_stmt(stmts, false, true));
+              parse_re_assign_stmt(stmts, false, false));
         } else
           expr.var =
               std::make_shared<std::vector<NodeBinaryExpr>>(parse_bexpr(stmts));
-      else {
+      } else {
         if (peek()->type == IDENT)
           expr.var = Token(consume());
         else if (peek()->type == INT_LIT)

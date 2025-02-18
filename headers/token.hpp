@@ -124,6 +124,7 @@ struct NodeMkStmt {
   Token identifier;
   DataType type;
   std::shared_ptr<NodeExpr> value;
+  bool is_initialized = true;
 };
 
 struct NodeStmts;
@@ -162,18 +163,19 @@ struct NodeIfStmt {
 
 struct Var {
   Token name;
-  size_t stackOffset;
+  size_t stackOffset = 1;
   Token value;
   bool is_prt = false;
   bool is_function = false;
   DataType type;
+  bool is_initialized = false;
 };
 
 struct NodeParam {
   Token identifier;
   DataType type;
   Token value;
-  Var toVar() { return Var{.name = identifier, .value = value}; }
+  size_t stackOffset = 1;
 };
 
 struct NodeRet {

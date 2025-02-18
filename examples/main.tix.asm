@@ -1,74 +1,56 @@
 
 section .bss
 
-	main.ad1 resd 1
-	main.ad2 resd 1
-	main.num resb 1024
+	std_print_string.m resb 1024
+	std_print_int.m resb 1024
+	std_getch.m resb 1024
+	std_getch.dst resb 1024
+	std_print_ch.m resb 1024
+	for0.i resd 1
 section .data
 
-	main.hello db "Course Repee" ,0
 section .text
 global _start
 
-extern std_terminate_process
-extern std_print_string
-extern std_flush
-extern std_print_int
-extern std_copy
-extern std_clear_string
-
+	extern std_terminate_process
 _start:
 
 
 	mov rbp, rsp
 	call main
 
-	%include "/home/dry/Documents/Eggo/Tix/bin/../examples/TIXIO.tix.asm"
-	%include "/home/dry/Documents/Eggo/Tix/bin/../examples/TIXMATH.tix.asm"
+	extern std_print_string
+	extern std_print_int
+	extern std_flush
+	extern std_getch
+	extern std_print_ch
+	mov dword [for0.i], 0
 main:
-	push rbp
-	mov rbp, rsp
-	mov dword [main.ad1], 100
-	mov dword [main.ad2], 2
+	sub rsp, 1
+	mov qword [rbp +8], rsp
+	mov qword [rbp + 16], 0
 	push rax
-	mov rax, [main.ad1]
-	mov [glob_add_int_int.a], rax
+	push r9
+	push r8
 
-pop rax
-	mov rdi, main.ad1
-	push rax
-	mov rax, [main.ad2]
-	mov [glob_add_int_int.b], rax
-
-pop rax
-	mov rsi, main.ad2
-	call glob_add_int_int
-
-	push rax
-	mov rax, [main.ad1]
-	mov [glob_add_int_int.a], rax
-
-pop rax
-	mov rdi, main.ad1
-	push rax
-	mov rax, [main.ad2]
-	mov [glob_add_int_int.b], rax
-
-pop rax
-	mov rsi, main.ad2
-	call glob_add_int_int
-
+for0:
+	mov cx, [for0.i]
+	mov ax, 10
+	cmp rcx, rax
+	jge for0end
+	mov rdi, qword [rbp + 8]
+	mov rsi, [rbp + 8]
+	call std_getch
+	mov rdi, qword [rbp + 8]
+	call std_print_ch
+	mov eax, 1
+	add dword [for0.i], eax
+	jmp for0
+nop
+for0end:
+	pop r9
+	pop r9
 	pop rax
-	mov [main.num], rax
-	push rax
-	mov rax, [main.hello]
-	mov [glob_print_str.msg], rax
-
-pop rax
-	mov rdi, main.hello
-	call glob_print_str
-
-	pop rbp
 
 	call std_terminate_process
 

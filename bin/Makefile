@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named eggo
+# Target rules for targets named tix
 
 # Build rule for target.
-eggo: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 eggo
-.PHONY : eggo
+tix: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tix
+.PHONY : tix
 
 # fast build rule for target.
-eggo/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eggo.dir/build.make CMakeFiles/eggo.dir/build
-.PHONY : eggo/fast
+tix/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tix.dir/build.make CMakeFiles/tix.dir/build
+.PHONY : tix/fast
 
 src/eggo.o: src/eggo.cpp.o
 .PHONY : src/eggo.o
 
 # target to build an object file
 src/eggo.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eggo.dir/build.make CMakeFiles/eggo.dir/src/eggo.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tix.dir/build.make CMakeFiles/tix.dir/src/eggo.cpp.o
 .PHONY : src/eggo.cpp.o
 
 src/eggo.i: src/eggo.cpp.i
@@ -142,7 +142,7 @@ src/eggo.i: src/eggo.cpp.i
 
 # target to preprocess a source file
 src/eggo.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eggo.dir/build.make CMakeFiles/eggo.dir/src/eggo.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tix.dir/build.make CMakeFiles/tix.dir/src/eggo.cpp.i
 .PHONY : src/eggo.cpp.i
 
 src/eggo.s: src/eggo.cpp.s
@@ -150,7 +150,7 @@ src/eggo.s: src/eggo.cpp.s
 
 # target to generate assembly for a file
 src/eggo.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eggo.dir/build.make CMakeFiles/eggo.dir/src/eggo.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tix.dir/build.make CMakeFiles/tix.dir/src/eggo.cpp.s
 .PHONY : src/eggo.cpp.s
 
 # Help Target
@@ -161,7 +161,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... eggo"
+	@echo "... tix"
 	@echo "... src/eggo.o"
 	@echo "... src/eggo.i"
 	@echo "... src/eggo.s"

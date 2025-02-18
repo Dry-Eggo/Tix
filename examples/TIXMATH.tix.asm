@@ -1,8 +1,8 @@
 
 section .bss
 
-	glob_add_int_int.a resb 1024
-	glob_add_int_int.b resb 1024
+	_Tix_TIXMATH.tix_add_int_intE.a resb 1024
+	_Tix_TIXMATH.tix_add_int_intE.b resb 1024
 section .data
 
 section .text
@@ -14,7 +14,7 @@ extern std_print_int
 extern std_copy
 extern std_clear_string
 
-glob_add_int_int:
+_Tix_TIXMATH.tix_add_int_intE:
 
 	push rbp
 	mov rbp, rsp

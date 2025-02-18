@@ -198,7 +198,43 @@ jnz .clear
 .done:
 pop rax
 ret
+; ------------------------------------------------
+global std_getch
+	; rdi -- file desc
+	; rsi -- buffer
 
+std_getch:
+	push rax
+	push rdx
+	
+	mov rdi, rdi		; file desc
+	mov rax, 0 		; syscall for std_read
+	mov rsi, rsi		; buffer
+	mov rdx, 1		; size 1 byte for a single char
+	syscall
+	
+	pop rdx
+	pop rax
+	ret
+; ------------------------------------------------
+global std_print_ch
+; rdi -- char
+std_print_ch:
+	push rax
+	push rdx
+	
+	mov rax, 1
+	mov rsi, rdi
+	mov rdi, 1
+	mov rdx, 1
+	syscall
+	nop
+	
+	pop rdx
+	pop rax
+	ret
+	
+	
 ; ------------------------------------------------
 section .bss
 buf resb 20

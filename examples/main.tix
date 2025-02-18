@@ -1,11 +1,19 @@
-bundle "TIXIO.tix" as TIXIO
-bundle "TIXMATH.tix" as TIXMATH
+extern std_print_string(m: str);
+extern std_print_int(m: int);
+extern std_flush();
+extern std_getch(m : int, dst : str);
+extern std_print_ch(m: str);
+
 
 mkf main()
 {
-  mk hello : str = "Course Repee";
-  mk ad1:int = 100;
-  mk ad2:int = 2;
-  mk num : int = TIXMATH::add(ad1, ad2);
-  TIXIO::print(hello);
+	mk name: str;
+	mk ds:int = 0;
+	
+	for(i : int = 0; i < 10; i+=1)
+	{
+		call std_getch(ds, name);
+		call std_print_ch(name);
+	};
+	
 };

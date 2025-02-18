@@ -54,7 +54,7 @@ public:
   std::vector<Var> varStack;
   std::vector<NodeFuncStmt> funcStack;
   bool main_ret = false;
-  std::string cur_nameSpace = "glob";
+  std::string cur_nameSpace;
 
   // ================== Scopes ======================= //
   std::map<std::string, std::vector<Var>> varScopes;
@@ -64,6 +64,7 @@ public:
   std::vector<std::string> queue;
   size_t currOffset = 1;
   size_t loop_count = 0;
+  size_t gbvalcounter = 0;
   std::stringstream TEXT, BSS, DATA, FUNC, HEADER, MAIN;
 
   inline void push(Var v) {
@@ -93,6 +94,13 @@ public:
       }
     }
     return false;
+  }
+  void move(std::stringstream *str, std::string loc, std::string val,
+            bool raw = false) {
+    if (!raw)
+      *str << "\n\tmov " << loc << ", " << val;
+    else
+      *str << "\n\tmov " << loc << ", [" << val << "]";
   }
 
   void str_expr(std::vector<std::string> expr, std::stringstream *p_ss) {
@@ -329,9 +337,7 @@ public:
       }
       void operator()(Token t) {
         std::string var_name = gen->scope_stack.back() + "." + t.value.value();
-        // std::cout << gen->varScopes[gen->scope_stack.back()].size() << "\n";
         for (auto var : gen->varScopes[gen->scope_stack.back()]) {
-          // printf("expr feed : %s\n", var.name.value.value().c_str());
           if (var.name.value.value() == var_name) {
             expr->push_back(var_name);
           }
@@ -359,6 +365,8 @@ public:
   inline AsmGen() {}
   inline void start(NodeProg program, std::string _path,
                     bool _check_main = true) {
+    _Tix_current_file = fs::absolute(fs::path(_path)).filename().string();
+    cur_nameSpace = _Tix_current_file;
     this->_path = _path;
     this->_check_main = _check_main;
     varScopes["main"] = varStack;
@@ -373,9 +381,7 @@ public:
     HEADER << "\nsection .text\n";
     if (_check_main)
       HEADER << "global _start\n";
-    HEADER << "\nextern std_terminate_process\nextern std_print_string\nextern "
-              "std_flush\nextern std_print_int\nextern std_copy\nextern "
-              "std_clear_string\n";
+    HEADER << "\n\textern std_terminate_process";
     if (_check_main)
       HEADER << "\n_start:\n";
     if (_check_main)
@@ -492,6 +498,10 @@ public:
               v.name = {.value = var_name};
               v.value = {.value = s.value.value.value()};
               v.type = STR;
+              v.stackOffset = gen->currOffset++;
+              v.is_initialized = true;
+              *p_ss << "\n\tmov qword [rbp + " << v.stackOffset * 8 << "], "
+                    << var_name;
               gen->varScopes[gen->scope_stack.back()].push_back(v);
             }
 
@@ -505,13 +515,14 @@ public:
                   exit(1);
                 }
               }
-              gen->resb(var_name, (char *)"1");
-              *p_ss << "\n\tmov dword [" + var_name + "], " +
-                           i.value.value.value();
               Var v;
               v.name = {.value = var_name};
               v.value = {.value = i.value.value.value()};
               v.type = INT;
+              v.stackOffset = gen->currOffset++;
+              v.is_initialized = true;
+              *p_ss << "\n\tmov qword [rbp + " << v.stackOffset * 8 << "], "
+                    << i.value.value.value();
               gen->varScopes[gen->scope_stack.back()].push_back(v);
             }
             void
@@ -524,17 +535,20 @@ public:
                   {.name = {.value = var_name}, .value = {.value = "rax"}});
             }
             void operator()(const std::shared_ptr<NodeFuncCall> &s) {
-              gen->BSS << "\n\t" << var_name << " resb 1024";
+              /*gen->BSS << "\n\t" << var_name << " resb 1024";*/
               std::vector<NodeStmts> stmt;
               stmt.push_back({.var = *s});
               gen->generate(stmt, *p_ss, *p_ss,
                             gen->varScopes[gen->scope_stack.back()]);
-              *p_ss << "\n\tpop rax";
-              *p_ss << "\n\tmov [" << var_name + "], rax";
-              gen->varScopes[gen->scope_stack.back()].push_back(
-                  {.name = {.value = var_name},
-                   .value = {.value = "rax"},
-                   .type = INT});
+              Var var;
+              var.name = {.value = var_name};
+              var.stackOffset = gen->currOffset++;
+              var.type = pm.type;
+              var.is_initialized = true;
+              /**p_ss << "\n\tpop rax";*/
+              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8
+                    << "], rax";
+              gen->varScopes[gen->scope_stack.back()].push_back(var);
             }
             void operator()(NodeCmp &c) {}
             void operator()(Token t) {
@@ -559,9 +573,14 @@ public:
                          pm.identifier.value.value().c_str());
                   exit(1);
                 }
-                *p_ss << "\n\tmov rax, ["
-                      << gen->scope_stack.back() + "." + t.value.value() << "]";
-                *p_ss << "\n\tmov [" << var_name << "], rax";
+                /**p_ss << "\n\tmov rax, ["*/
+                /*      << gen->scope_stack.back() + "." + t.value.value() <<
+                 * "]";*/
+                /**p_ss << "\n\tmov [" << var_name << "], rax";*/
+                *p_ss << "\n\tmov rax, qword [rbp + " << _tester.stackOffset * 8
+                      << "]";
+                *p_ss << "\n\tmov qword [rbp + " << gen->currOffset * 8
+                      << "], rax";
               } else {
                 printf("Error : \"%s\" is not declared in this scope\n",
                        t.value.value().c_str());
@@ -571,60 +590,87 @@ public:
               v.name = {.value = var_name};
               v.value = {.value = t.value.value()};
               v.type = pm.type;
+              v.stackOffset = gen->currOffset++;
+              v.is_initialized = true;
               gen->varScopes[gen->scope_stack.back()].push_back(v);
             }
           };
-
-          std::visit(mkVisitor{&m.identifier, gen, p_ss, m}, m.value->var);
+          if (m.is_initialized)
+            std::visit(mkVisitor{&m.identifier, gen, p_ss, m}, m.value->var);
+          else {
+            *p_ss << "\n\tsub rsp, 1";
+            *p_ss << "\n\tmov qword [rbp +" << gen->currOffset * 8 << "], rsp";
+            gen->currOffset++;
+          }
         }
 
         void operator()(NodeReStmt r) {
           bool found = false;
 
-          std::string var_name;
-
           // check if variable has been declared before
 
-          for (int i = 0; i < gen->scope_stack.size(); i++) {
-            var_name =
-                gen->scope_stack.at(i) + "." + r.identifier.value.value();
-            for (auto v : gen->varScopes[gen->scope_stack.at(i)]) {
-              if (v.name.value.value() == var_name) {
+          struct mkVisitor {
+            Token *ident;
+            AsmGen *gen;
+            std::stringstream *p_ss;
+            NodeReStmt pm;
+            std::string var_name =
+                gen->scope_stack.back() + "." + pm.identifier.value.value();
 
-                struct mkVisitor {
-                  Token *ident;
-                  AsmGen *gen;
-                  std::stringstream *p_ss;
-                  NodeReStmt pm;
-                  std::string var_name;
+            void operator()(NodeString s) {
 
-                  void operator()(NodeString s) {}
+              Var var;
+              std::string gbval = "gbval" + std::to_string(gen->gbvalcounter++);
 
-                  void operator()(NodeInt i) {
-                    *p_ss << "\n\tmov dword [" + var_name + "], " +
-                                 i.value.value.value();
-                  }
-                  void operator()(
-                      const std::shared_ptr<std::vector<NodeBinaryExpr>> &b) {
-                    gen->gen_expr(b, p_ss);
-                    *p_ss << "\n\tpop rax";
-                    *p_ss << "\n\tmov [" + var_name + "], rax";
-                  }
-                  void operator()(const std::shared_ptr<NodeFuncCall> &s) {}
-                  void operator()(NodeCmp &c) {}
-                  void operator()(Token t) {
-                    *p_ss << "\n\tmov rax, [" + t.value.value() + "]";
-                    *p_ss << "\n\tmov [" + var_name + "], rax";
-                  }
-                };
-
-                std::visit(mkVisitor{&r.identifier, gen, p_ss, r, var_name},
-                           r.new_value->var);
-
-                break;
+              for (auto &_item : gen->varScopes[gen->scope_stack.back()]) {
+                if (_item.name.value == var_name) {
+                  var = _item;
+                }
               }
+              gen->make(gbval, s.value.value.value());
+              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8 << "], "
+                    << gbval;
             }
-          }
+
+            void operator()(NodeInt i) {
+              Var var;
+
+              for (auto &_item : gen->varScopes[gen->scope_stack.back()]) {
+                if (_item.name.value == var_name) {
+                  var = _item;
+                }
+              }
+              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8 << "], "
+                    << i.value.value.value();
+            }
+            void
+            operator()(const std::shared_ptr<std::vector<NodeBinaryExpr>> &b) {
+              gen->gen_expr(b, p_ss);
+              *p_ss << "\n\tpop rax";
+              *p_ss << "\n\tmov [" + var_name + "], rax";
+            }
+            void operator()(const std::shared_ptr<NodeFuncCall> &s) {}
+            void operator()(NodeCmp &c) {}
+            void operator()(Token t) {
+              Var var;
+              Var nvar;
+              auto nvar_name = gen->scope_stack.back() + t.value.value();
+              for (auto v : gen->varScopes[gen->scope_stack.back()]) {
+                if (v.name.value == var_name) {
+                  var = v;
+                }
+                if (v.name.value == nvar_name) {
+                  nvar = v;
+                }
+              }
+              *p_ss << "\n\tmov rax, qword [rbp + " << nvar.stackOffset * 8
+                    << "]";
+              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8
+                    << "], rax";
+            }
+          };
+
+          std::visit(mkVisitor{&r.identifier, gen, p_ss, r}, r.new_value->var);
 
           // mov new-value into the address of variable
         }
@@ -660,7 +706,7 @@ public:
 
             void operator()(const std::shared_ptr<NodeFuncCall> &f) {}
             void operator()(NodeInt i) {
-              *p_ss << "\n\tmov r9, " << i.value.value.value();
+              *p_ss << "\n\tmov ax, " << i.value.value.value();
             }
             void operator()(Token t) {
               bool found_token = false;
@@ -786,14 +832,16 @@ public:
           printf("Generating %s\n", f.identifier.value.value().c_str());
           std::stringstream temp;
           std::stringstream nest;
+          // Generating mangled_name
           auto func_name =
-              gen->cur_nameSpace + "_" + f.identifier.value.value();
+              "_Tix_" + gen->cur_nameSpace + "_" + f.identifier.value.value();
           for (auto p : f.params) {
             if (p.type == DataType::STR)
               func_name += "_str";
             else if (p.type == DataType::INT)
               func_name += "_int";
           }
+          func_name += "E";
           f.mangled_name = func_name;
 
           size_t scope_offset = 1; // cover the memory of the current scope;
@@ -810,8 +858,8 @@ public:
           else {
             temp << "\nmain:";
           }
-          temp << "\n\tpush rbp";
-          temp << "\n\tmov rbp, rsp";
+          /*temp << "\n\tpush rbp";*/
+          /*temp << "\n\tmov rbp, rsp";*/
           // argument name uniqueness with current scope prefix
           std::string param_name;
           if (f.identifier.value.value() == "main")
@@ -871,6 +919,7 @@ public:
               if (gen->validate(t)) {
                 *p_ss << "\n\tmov rax, ["
                       << gen->scope_stack.back() + "." + t.value.value() << "]";
+                *p_ss << "\n\tret";
               }
             }
             void operator()(NodeString) {}
@@ -878,7 +927,7 @@ public:
           };
 
           gen->main_ret = true;
-          temp << "\n\tpop rbp\n";
+          /*temp << "\n\tpop rbp\n";*/
           if (f.has_ret)
             std::visit(_ret_visitor{gen, &temp, f}, f.ret_value.value->var);
           /*for (int i = 0; i < f.param_count; i++) {*/
@@ -900,147 +949,40 @@ public:
         }
 
         void operator()(NodeFuncCall fc) {
-          /* gen->changeScope(fc.identifier.value.value()); */
-          //  checking if function has been declared
-          bool found_function = false;
-          bool is_etrn = fc.is_extrn;
-          if (gen->cur_nameSpace == "glob")
-            gen->cur_nameSpace = fc.ns;
+          // valid params
+          bool _is_external = false;
+          bool _is_valid = false;
 
-          //	matching function stmt
-          NodeFuncStmt match_func;
-          for (int i = gen->scope_stack.size() - 1; i > 0; i--) {
-            auto scope = gen->varScopes[gen->scope_stack.at(i)];
-            if (Semantics::find_symbol(scope, fc.identifier, Semantics::func)) {
-              found_function = true;
-              break;
+          // validate that the function exists
+          NodeFuncStmt _function_symbol;
+          if (fc.is_extrn) {
+            for (auto &_item : extern_funcStack[gen->cur_nameSpace]) {
+              if (_item.identifier.value.value() ==
+                  fc.identifier.value.value()) {
+                _function_symbol = _item;
+                _is_valid = true;
+              }
             }
           }
-          if (!found_function) {
-            printf("Current namespace = %s\n", gen->cur_nameSpace.c_str());
-            if (gen->cur_nameSpace == "glob")
-              Semantics::Throw_Error(
-                  "Symbol '%s' is not declared in this scope\n",
-                  fc.identifier.value.value().c_str());
-            else {
-              for (auto &_scope : extrn_namespaces) {
-                if (_scope.first == gen->cur_nameSpace) {
-                  if (Semantics::find_symbol(_scope.second, fc.identifier,
-                                             Semantics::symtype::func)) {
-                    found_function = true;
-                    is_etrn = true;
-                  }
+
+          if (!_is_valid) {
+            if (Semantics::find_symbol(gen->varScopes[gen->scope_stack.back()],
+                                       fc.identifier,
+                                       Semantics::symtype::func)) {
+              _is_valid = true;
+              for (auto &_item : gen->funcStack) {
+                if (_item.identifier.value.value() ==
+                    fc.identifier.value.value()) {
+                  _function_symbol = _item;
+                  _is_valid = true;
                 }
               }
-              if (!found_function)
-                Semantics::Throw_Error(
-                    "Symbol '%s' is not declared in this scope\n",
-                    fc.identifier.value.value().c_str());
-            }
-          }
-          for (auto f : gen->funcStack) {
-            if (fc.identifier.value.value() == f.identifier.value.value()) {
-              found_function = true;
-              match_func = f;
-              // check number of parameters given
-              if (fc.params.size() != f.params.size()) {
-                printf("Invalid Amount of Parameters provided\n to \"%s\" "
-                       "expected : %ld, got : %ld\n",
-                       f.identifier.value.value().c_str(), f.params.size(),
-                       fc.params.size());
-                exit(1);
-              }
-              break;
             }
           }
 
-          if (is_etrn) {
-            for (auto f : extern_funcStack[gen->cur_nameSpace]) {
-              if (fc.identifier.value.value() == f.identifier.value.value()) {
-                found_function = true;
-                match_func = f;
-                gen->cur_nameSpace = "glob";
-                // check number of parameters given
-                if (fc.params.size() != f.params.size()) {
-                  printf("Invalid Amount of Parameters provided\n to \"%s\" "
-                         "expected : %ld, got : %ld\n",
-                         f.identifier.value.value().c_str(), f.params.size(),
-                         fc.params.size());
-                  exit(1);
-                }
-                break;
-              }
-            }
-            if (!found_function) {
-              printf("Use of Undeclared identifier \"%s\"\n",
-                     fc.identifier.value.value().c_str());
-              exit(1);
-            }
-          }
-          //  match params --> args
-          int counter = 1;
-          for (int i = 0; i < match_func.params.size(); i++) {
-            bool found_var = false;
-            auto arg = match_func.params.at(i);
-            auto param = fc.params.at(i);
-            std::string param_name;
-            if (gen->scope_stack.back() != "main")
-              param_name = gen->cur_nameSpace + "_" + gen->scope_stack.back() +
-                           "." + param.value.value.value();
-            else {
-              param_name = "main." + param.value.value.value();
-            }
-            auto arg_name =
-                match_func.mangled_name + "." + arg.identifier.value.value();
-            // check declaration of param as variable
-            for (auto v : gen->varScopes[gen->scope_stack.back()]) {
-              if (v.name.value.value() == param_name) {
-                found_var = true;
-                break;
-              }
-            }
-            // copy value of param to argument
-            *p_ss << "\n\tpush rax";
-            *p_ss << "\n\tmov rax, [" + param_name + "]";
-            *p_ss << "\n\tmov [" + arg_name + "], rax";
-            *p_ss << "\n\npop rax";
-
-            switch (i) {
-            case 0:
-              if (param.value.is_ptr)
-                *p_ss << "\n\tmov rdi, [" + param_name + "]";
-              else
-                *p_ss << "\n\tmov rdi, " + param_name;
-              break;
-            case 1:
-              if (param.value.is_ptr)
-                *p_ss << "\n\tmov rsi, [" + param_name + "]";
-              else
-                *p_ss << "\n\tmov rsi, " + param_name;
-              break;
-            case 2:
-              if (param.value.is_ptr)
-                *p_ss << "\n\tmov rdx, [" + param_name + "]";
-              else
-                *p_ss << "\n\tmov rdx, " + param_name;
-              break;
-            default:
-              if (param.value.is_ptr)
-                *p_ss << "\n\tpush [" + param_name + "]";
-              else
-                *p_ss << "\n\tpush " + param_name;
-              break;
-            }
-            if (!found_var) {
-              printf("Use of Undecalred Identifier \"%s\"\n",
-                     param_name.c_str());
-              exit(1);
-            }
-
-            counter++;
-          }
-
-          *p_ss << "\n\tcall " << match_func.mangled_name + "\n";
+          // pass parameters to arguments
+          // call the function
+          *p_ss << "\n\tcall " + _function_symbol.mangled_name;
         }
 
         void operator()(NodeCallStmt c) {
@@ -1068,10 +1010,15 @@ public:
                                      name.c_str());
           }
           // layout params
+          Var v;
           for (auto &param : c.params) {
-            auto param_name = gen->cur_nameSpace + "_" +
-                              gen->scope_stack.back() + "." +
-                              param.value.value.value();
+            std::string param_name;
+            if (gen->scope_stack.back() != "main")
+              param_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                           gen->scope_stack.back() + "." +
+                           param.value.value.value();
+            else
+              param_name = "main." + param.value.value.value();
             param.value.value = param_name;
             bool is_valid_p = false;
 
@@ -1080,9 +1027,16 @@ public:
               if (Semantics::find_symbol(_scope.second, param.value,
                                          Semantics::symtype::scope)) {
                 is_valid_p = true;
+                for (auto &_item : _scope.second) {
+                  if (_item.name.value == param.value.value) {
+                    v = _item;
+                    param.stackOffset = _item.stackOffset;
+                  }
+                }
                 break;
               }
             }
+
             // TODO : Check bundled symbols for the parameter
             /*if (!is_valid_p)*/
             /*  Semantics::Throw_Error("'%s' was not declared in this scope",*/
@@ -1091,38 +1045,27 @@ public:
           auto param_count = c.params.size();
           for (int i = 0; i < param_count; i++) {
             bool is_ptr = (c.params.at(i).value.is_ptr) ? true : false;
-            auto param_name = c.params.at(i).value.value.value();
+            auto param = c.params.at(i);
             switch (i) {
             case 0:
-              if (is_ptr)
-                *p_ss << "\n\tmov rdi, [" + param_name + "]";
-              else
-                *p_ss << "\n\tmov rdi, " + param_name;
+              *p_ss << "\n\tmov rdi, qword [rbp + " << param.stackOffset * 8
+                    << "]";
               break;
             case 1:
-              if (is_ptr)
-                *p_ss << "\n\tmov rsi, [" + param_name + "]";
-              else
-                *p_ss << "\n\tmov rsi, " + param_name;
+              *p_ss << "\n\tmov rsi, [rbp + " << param.stackOffset * 8 << "]";
               break;
 
             case 2:
-              if (is_ptr)
-                *p_ss << "\n\tmov rdx, [" + param_name + "]";
-              else
-                *p_ss << "\n\tmov rdx, " + param_name;
+              *p_ss << "\n\tmov rdx, [rbp + " << param.stackOffset * 8 << "]";
               break;
             default:
-              if (is_ptr)
-                *p_ss << "\n\tpush [" + param_name + "]";
-              else
-                *p_ss << "\n\tpush " + param_name;
+              *p_ss << "\n\tpush [rbp + " << param.stackOffset * 8 << "]";
               break;
             }
           }
 
           // call
-          *p_ss << "\n\t call " + c.std_lib_value.value.value();
+          *p_ss << "\n\tcall " + c.std_lib_value.value.value();
         }
         void operator()(NodeExtrnStmt e) {
           std::vector<Var> scope;
@@ -1607,6 +1550,7 @@ public:
               Semantics::Throw_Error("No Such Alias");
             }
           }
+          gen->cur_nameSpace = r.scope_alias;
           struct visitor {
             AsmGen *gen;
             NodeScopeRes r;
@@ -1614,15 +1558,14 @@ public:
             bool is_func = false;
             std::stringstream *p_ss;
             void operator()(NodeFuncCall fc) {
-              printf("\n\n\n\n\n\n");
-              if (!Semantics::find_symbol(extern_varScopes[r.scope_alias],
+              if (!Semantics::find_symbol(extern_varScopes[gen->cur_nameSpace],
                                           fc.identifier, Semantics::func)) {
-                Semantics::Throw_Error("badd");
+                Semantics::Throw_Error("symbol '%s' could not be resolved",
+                                       fc.identifier.value.value().c_str());
               }
               fc.is_extrn = true;
               NodeProg funcC;
               funcC.stmt.push_back({.var = fc});
-              gen->cur_nameSpace = r.scope_alias;
               gen->generate(funcC.stmt, *p_ss, *p_ss,
                             gen->varScopes[gen->scope_stack.back()]);
             }
