@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   }
 
   std::stringstream ss;
-  ss << "nasm -f elf64 -g -F dwarf " << _file << ".asm -o " << _file << ".o";
+  ss << "nasm -f elf64 -g -F dwarf " << _file << ".asm -o " << _out << ".o";
 
   system(ss.str().c_str());
 

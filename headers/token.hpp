@@ -174,8 +174,10 @@ struct Var {
 struct NodeParam {
   Token identifier;
   DataType type;
-  Token value;
+  std::variant<Token, NodeInt, NodeString> value;
   size_t stackOffset = 1;
+  std::string mangled_name;
+  bool isptr = false;
 };
 
 struct NodeRet {

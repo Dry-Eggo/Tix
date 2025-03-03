@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <execution>
 #include <filesystem>
 #include <fstream>
 #include <ios>
@@ -83,7 +84,7 @@ public:
     DATA << "\n\t" + name + " " + met + " " + val + ", 0";
   }
   void resb(std::string name, char *size) {
-    BSS << "\n\t" + name + " resd " + size;
+    BSS << "\n\t" + name + " resb " + size;
   }
   bool validate(Token t) {
 
@@ -149,6 +150,7 @@ public:
         *p_ss << "\n\tcqot";
         *p_ss << "\n\tmov rbx, rcx";
         *p_ss << "\n\tidiv rbx";
+        *p_ss << "\n\tpush rbx";
 
         expr.at(i) = "pop";
 
@@ -197,6 +199,7 @@ public:
         }
 
         *p_ss << "\n\timul rax, rcx";
+        *p_ss << "\n\tpush rax";
 
         expr.at(i) = "pop";
 
@@ -380,10 +383,10 @@ public:
 
     HEADER << "\nsection .text\n";
     if (_check_main)
-      HEADER << "global _start\n";
+      HEADER << "global main\n";
     HEADER << "\n\textern std_terminate_process";
-    if (_check_main)
-      HEADER << "\n_start:\n";
+    /*if (_check_main)*/
+    /*  HEADER << "\n_start:\n";*/
     if (_check_main)
       HEADER << "\n\n\tmov rbp, rsp\n\tcall main\n";
 
@@ -481,8 +484,9 @@ public:
             AsmGen *gen;
             std::stringstream *p_ss;
             NodeMkStmt pm;
-            std::string var_name =
-                gen->scope_stack.back() + "." + pm.identifier.value.value();
+            std::string var_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                                   gen->scope_stack.back() + "." +
+                                   pm.identifier.value.value();
 
             void operator()(NodeString s) {
 
@@ -500,7 +504,7 @@ public:
               v.type = STR;
               v.stackOffset = gen->currOffset++;
               v.is_initialized = true;
-              *p_ss << "\n\tmov qword [rbp + " << v.stackOffset * 8 << "], "
+              *p_ss << "\n\tmov qword [rbp - " << v.stackOffset * 8 << "], "
                     << var_name;
               gen->varScopes[gen->scope_stack.back()].push_back(v);
             }
@@ -521,7 +525,7 @@ public:
               v.type = INT;
               v.stackOffset = gen->currOffset++;
               v.is_initialized = true;
-              *p_ss << "\n\tmov qword [rbp + " << v.stackOffset * 8 << "], "
+              *p_ss << "\n\tmov qword [rbp - " << v.stackOffset * 8 << "], "
                     << i.value.value.value();
               gen->varScopes[gen->scope_stack.back()].push_back(v);
             }
@@ -545,8 +549,7 @@ public:
               var.stackOffset = gen->currOffset++;
               var.type = pm.type;
               var.is_initialized = true;
-              /**p_ss << "\n\tpop rax";*/
-              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8
+              *p_ss << "\n\tmov qword [rbp - " << var.stackOffset * 8
                     << "], rax";
               gen->varScopes[gen->scope_stack.back()].push_back(var);
             }
@@ -555,7 +558,8 @@ public:
               // reserving space for the variable
               gen->resb(var_name, (char *)"1024");
               // check if the value beign passed is valid
-              auto _newValue = gen->scope_stack.back() + "." + t.value.value();
+              auto _newValue = "_Tix_" + gen->cur_nameSpace + "_" +
+                               gen->scope_stack.back() + "." + t.value.value();
               bool found = false;
               Var _tester;
               for (auto &_var : gen->varScopes[gen->scope_stack.back()]) {
@@ -567,20 +571,28 @@ public:
               if (found) {
                 // type checking
                 if (_tester.type != pm.type) {
-                  printf("Cannot pass value of \"%s\" to \"%s\" :: Invalid "
-                         "Type Matching\n",
-                         t.value.value().c_str(),
-                         pm.identifier.value.value().c_str());
-                  exit(1);
+                  if (!_tester.is_prt) {
+                    printf("Cannot pass value of \"%s\" to \"%s\" :: Invalid "
+                           "Type Matching\n",
+                           t.value.value().c_str(),
+                           pm.identifier.value.value().c_str());
+                    exit(1);
+                  }
                 }
                 /**p_ss << "\n\tmov rax, ["*/
                 /*      << gen->scope_stack.back() + "." + t.value.value() <<
                  * "]";*/
                 /**p_ss << "\n\tmov [" << var_name << "], rax";*/
-                *p_ss << "\n\tmov rax, qword [rbp + " << _tester.stackOffset * 8
-                      << "]";
-                *p_ss << "\n\tmov qword [rbp + " << gen->currOffset * 8
-                      << "], rax";
+                if (_tester.type != R_PTR_T) {
+                  *p_ss << "\n\tmov rax, qword [rbp - "
+                        << _tester.stackOffset * 8 << "]";
+                  *p_ss << "\n\tmov qword [rbp - " << gen->currOffset * 8
+                        << "], rax";
+                } else {
+                  *p_ss << "\n\tmov rax, " << _tester.name.value.value() << "";
+                  *p_ss << "\n\tmov qword [rbp - " << gen->currOffset * 8
+                        << "], rax";
+                }
               } else {
                 printf("Error : \"%s\" is not declared in this scope\n",
                        t.value.value().c_str());
@@ -595,12 +607,27 @@ public:
               gen->varScopes[gen->scope_stack.back()].push_back(v);
             }
           };
+          std::string var_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                                 gen->scope_stack.back() + "." +
+                                 m.identifier.value.value();
           if (m.is_initialized)
             std::visit(mkVisitor{&m.identifier, gen, p_ss, m}, m.value->var);
           else {
-            *p_ss << "\n\tsub rsp, 1";
-            *p_ss << "\n\tmov qword [rbp +" << gen->currOffset * 8 << "], rsp";
-            gen->currOffset++;
+            if (m.type == R_PTR_T) {
+              gen->resb(var_name, (char *)"1024");
+              Var v;
+              v.value = m.identifier;
+              v.name = {.value = var_name};
+              v.is_prt = true;
+              v.stackOffset = gen->currOffset++;
+              v.type = m.type;
+              gen->varScopes[gen->scope_stack.back()].push_back(v);
+            } else {
+              *p_ss << "\n\tsub rsp, 1";
+              *p_ss << "\n\tmov qword [rbp -" << gen->currOffset * 8
+                    << "], rsp";
+              gen->currOffset++;
+            }
           }
         }
 
@@ -628,7 +655,7 @@ public:
                 }
               }
               gen->make(gbval, s.value.value.value());
-              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8 << "], "
+              *p_ss << "\n\tmov qword [rbp - " << var.stackOffset * 8 << "], "
                     << gbval;
             }
 
@@ -640,7 +667,7 @@ public:
                   var = _item;
                 }
               }
-              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8 << "], "
+              *p_ss << "\n\tmov qword [rbp - " << var.stackOffset * 8 << "], "
                     << i.value.value.value();
             }
             void
@@ -654,18 +681,20 @@ public:
             void operator()(Token t) {
               Var var;
               Var nvar;
-              auto nvar_name = gen->scope_stack.back() + t.value.value();
+              auto nvar_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                               gen->scope_stack.back() + "." + t.value.value();
               for (auto v : gen->varScopes[gen->scope_stack.back()]) {
+                printf("%s, %s\n", var_name.c_str(), nvar_name.c_str());
                 if (v.name.value == var_name) {
                   var = v;
                 }
-                if (v.name.value == nvar_name) {
+                if (v.name.value == t.value.value()) {
                   nvar = v;
                 }
               }
-              *p_ss << "\n\tmov rax, qword [rbp + " << nvar.stackOffset * 8
+              *p_ss << "\n\tmov rax, qword [rbp - " << nvar.stackOffset * 8
                     << "]";
-              *p_ss << "\n\tmov qword [rbp + " << var.stackOffset * 8
+              *p_ss << "\n\tmov qword [rbp - " << var.stackOffset * 8
                     << "], rax";
             }
           };
@@ -682,18 +711,31 @@ public:
           // dword [counter], 0
 
           std::string for_name = "for" + std::to_string(gen->loop_count++);
-          auto ident_name = for_name + "." + f.identifier.value.value();
+          auto ident_name = "_Tix_" + gen->cur_nameSpace + "_" + for_name +
+                            "." + f.identifier.value.value();
           std::stringstream f_header;
 
-          gen->resb(for_name + "." + f.identifier.value.value(), (char *)"1");
+          gen->resb(ident_name, (char *)"1");
+
+          Var v;
+          v.name = {.value = ident_name};
+          v.value = f.startValue;
+          if (f.startValue.type == STRING_LIT)
+            v.type = DataType::STR;
+          else if (f.startValue.type == INT_LIT)
+            v.type = DataType::INT;
+          v.stackOffset = gen->currOffset++;
 
           *c_ss << "\n\tmov dword [" + ident_name + "], "
                 << f.startValue.value.value();
-
+          *c_ss << "\n\tmov dword [rbp - " << v.stackOffset * 8 << "], "
+                << f.startValue.value.value();
           // saving registers
 
-          *p_ss << "\n\tpush rax\n\tpush r9\n\tpush r8\n";
+          *p_ss << "\n\tpush rbx";
+          *p_ss << "\n\tpush r12";
 
+          *p_ss << "\n\tmov rbx, " << f.startValue.value.value();
           *p_ss << "\n" + for_name + ":";
 
           //  check comparisons
@@ -703,10 +745,11 @@ public:
             std::stringstream *p_ss;
             std::string ident_name;
             bool rhs = false;
+            Var *v;
 
             void operator()(const std::shared_ptr<NodeFuncCall> &f) {}
             void operator()(NodeInt i) {
-              *p_ss << "\n\tmov ax, " << i.value.value.value();
+              *p_ss << "\n\tmov r12, " << i.value.value.value();
             }
             void operator()(Token t) {
               bool found_token = false;
@@ -733,29 +776,26 @@ public:
               // i move the value at the address of the variable into eax
               // moving the label will move the memory address which is
               // different from the actual value
-              if (rhs) {
-                *p_ss << "\n\tmov ax, [" + var_name + "]";
-              } else
-                *p_ss << "\n\tmov cx, [" + var_name + "]";
+              /*if (rhs) {*/
+              /*  *p_ss << "\n\tmov r12, [rbp - " << v->stackOffset * 8 <<
+               * "]";*/
+              /*} else*/
+              /*  *p_ss << "\n\tmov rbx, [rbp - " << v->stackOffset * 8 <<
+               * "]";*/
             }
           };
           gen->changeScope(for_name);
-          Var v;
-          v.name = {.value = ident_name};
-          v.value = f.startValue;
-          if (f.startValue.type == STRING_LIT)
-            v.type = DataType::STR;
-          else if (f.startValue.type == INT_LIT)
-            v.type = DataType::INT;
           gen->varScopes[gen->scope_stack.back()].push_back(v);
           // gen->varScopes[gen->scope_stack.back()].push_back({.name =
           // {.value = ident_name}, .value =f.startValue, .type =
           // f.startValue.type});
 
-          std::visit(forVisit{gen, p_ss, ident_name}, f.condition->lhs);
-          std::visit(forVisit{gen, p_ss, ident_name, true}, f.condition->rhs);
+          std::visit(forVisit{gen, p_ss, ident_name, false, &v},
+                     f.condition->lhs);
+          std::visit(forVisit{gen, p_ss, ident_name, true, &v},
+                     f.condition->rhs);
 
-          *p_ss << "\n\tcmp rcx, rax";
+          *p_ss << "\n\tcmp rbx, r12";
           if (f.condition->cmp_s == "==")
             *p_ss << "\n\tjne " << for_name + "end";
           else if (f.condition->cmp_s == "!=")
@@ -770,7 +810,6 @@ public:
             *p_ss << "\n\tjg " << for_name + "end";
 
           // generate body
-
           gen->generate(f.body, *c_ss, *p_ss,
                         gen->varScopes[gen->scope_stack.back()]);
 
@@ -782,7 +821,7 @@ public:
 
             void operator()(const std::shared_ptr<NodeFuncCall> &f) {}
             void operator()(NodeInt i) {
-              *p_ss << "\n\tmov eax, " + i.value.value.value();
+              *p_ss << "\n\tmov r12, " + i.value.value.value();
             }
             void operator()(Token t) {
               bool found_token = false;
@@ -812,17 +851,18 @@ public:
               *p_ss << "\n\tmov eax, [" + var_name + "]";
             }
           };
-
           std::visit(incVisit{gen, p_ss, ident_name}, f.increment.rhs);
-          if (f.increment.cmp_s == "+=")
-            *p_ss << "\n\tadd dword [" + ident_name + "], eax\n\tjmp " +
-                         for_name + "\nnop";
-          else if (f.increment.cmp_s == "-=")
-            *p_ss << "\n\tsub dword [" + ident_name + "], eax\n\tjmp " +
-                         for_name;
+          if (f.increment.cmp_s == "+=") {
+            *p_ss << "\n\tadd rbx, r12";
+            *p_ss << "\n\tmov qword [rbp - " << v.stackOffset * 8 << "], rbx";
+          } else if (f.increment.cmp_s == "-=") {
+            *p_ss << "\n\tsub [rbp - " << v.stackOffset * 8 << "], r12";
+          }
+          *p_ss << "\n\tjmp " + for_name;
 
           *p_ss << "\n" + for_name + "end:";
-          *p_ss << "\n\tpop r9\n\tpop r9\n\tpop rax\n";
+          *p_ss << "\n\tpop r12";
+          *p_ss << "\n\tpop rbx";
 
           gen->exitScope();
         }
@@ -844,57 +884,56 @@ public:
           func_name += "E";
           f.mangled_name = func_name;
 
-          size_t scope_offset = 1; // cover the memory of the current scope;
-
           gen->funcStack.push_back(f);
           Var function;
           function.is_function = true;
           function.name = f.identifier;
           function.type = f.ret_type;
           gen->varScopes[gen->scope_stack.back()].push_back(function);
-          gen->changeScope(f.identifier.value.value());
           if (f.identifier.value.value() != "main")
             temp << "\n" << f.mangled_name << ":\n";
           else {
             temp << "\nmain:";
           }
-          /*temp << "\n\tpush rbp";*/
-          /*temp << "\n\tmov rbp, rsp";*/
+          temp << "\n\tpush rbp";
+          temp << "\n\tmov rbp, rsp";
           // argument name uniqueness with current scope prefix
           std::string param_name;
           if (f.identifier.value.value() == "main")
             func_name = "main";
+          gen->changeScope(f.identifier.value.value());
+          size_t gen_offset_save = gen->currOffset;
+          gen->currOffset = 1;
           for (int i = 0; i < f.param_count; i++) {
-            param_name =
-                func_name + "." + f.params.at(i).identifier.value.value();
+            param_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                         gen->scope_stack.back() + "." +
+                         f.params.at(i).identifier.value.value();
+            printf("arg : %s\n", param_name.c_str());
+            auto param = f.params.at(i);
             Var v;
-            v.name.value = param_name;
+            v.value.value = param.identifier.value;
+            v.name = {.value = param_name};
             v.type = f.params.at(i).type;
+            v.stackOffset = gen->currOffset++;
+            v.is_prt = (v.type == DataType::R_PTR_T) ? true : false;
             gen->varScopes[gen->scope_stack.back()].push_back(v);
             gen->BSS << "\n\t" << param_name << " resb 1024";
             switch (i) {
             case 0:
               temp << "\n\tmov [rbp -8], rdi\n";
-              scope.push_back({.name = {.value = param_name},
-                               .stackOffset = scope_offset++,
-                               .value = f.params.at(i).value});
               break;
             case 1:
-              scope.push_back({.name = {.value = param_name},
-                               .stackOffset = scope_offset++,
-                               .value = f.params.at(i).value});
               temp << "\n\tmov [rbp -16], rsi\n";
               break;
             case 2:
-              scope.push_back({.name = {.value = param_name},
-                               .stackOffset = scope_offset++,
-                               .value = f.params.at(i).value});
               temp << "\n\tmov [rbp -24], rdx\n";
             default:
               break;
             }
+            gen->currOffset += 3;
             f.params.at(i).identifier.value.value() = param_name.c_str();
           }
+
           if (f.identifier.value.value() != "main")
             gen->generate(f.body, gen->MAIN, temp,
                           scope); // stream for child statements
@@ -905,21 +944,40 @@ public:
             AsmGen *gen;
             std::stringstream *p_ss;
             NodeFuncStmt f;
+            std::string reg =
+                (f.identifier.value.value() == "main") ? "rdi" : "rax";
             void operator()(NodeInt i) {
               if (f.ret_type == DataType::INT)
-                *p_ss << "\n\tmov rax, " << i.value.value.value();
+                *p_ss << "\n\tmov " << reg << ", " << i.value.value.value();
             }
             void operator()(std::shared_ptr<std::vector<NodeBinaryExpr>> &b) {
               gen->gen_expr(b, p_ss);
-              *p_ss << "\n\tmov rax, rax";
+              *p_ss << "\n\tpop " << reg;
+
+              *p_ss << "\n\tpop rbp";
               *p_ss << "\n\tret";
             }
             void operator()(std::shared_ptr<NodeFuncCall> &f) {}
             void operator()(Token t) {
-              if (gen->validate(t)) {
-                *p_ss << "\n\tmov rax, ["
-                      << gen->scope_stack.back() + "." + t.value.value() << "]";
-                *p_ss << "\n\tret";
+              for (int i = gen->scope_stack.size() - 1; i >= 0; i--) {
+                auto scope = gen->varScopes[gen->scope_stack.at(i)];
+                auto ret_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                                gen->scope_stack.at(i) + "." + t.value.value();
+                std::cout << "scope  : " << gen->scope_stack.at(i)
+                          << " ret_name : " << ret_name << "\n";
+                for (auto &_item : scope) {
+                  if (_item.name.value == ret_name) {
+                    if (!_item.is_prt) {
+                      *p_ss << "\n\tmov " << reg << ", [rbp - "
+                            << _item.stackOffset * 8 << "]";
+                      *p_ss << "\n\tpop rbp";
+                    } else {
+                      *p_ss << "\n\tmov " << reg << ", " << ret_name;
+                      *p_ss << "\n\tpop rbp";
+                    }
+                    *p_ss << "\n\tret";
+                  }
+                }
               }
             }
             void operator()(NodeString) {}
@@ -927,7 +985,6 @@ public:
           };
 
           gen->main_ret = true;
-          /*temp << "\n\tpop rbp\n";*/
           if (f.has_ret)
             std::visit(_ret_visitor{gen, &temp, f}, f.ret_value.value->var);
           /*for (int i = 0; i < f.param_count; i++) {*/
@@ -940,12 +997,13 @@ public:
             gen->MAIN << temp.str();
             /*gen->varScopes["main"] = scope;*/
           } else {
-            temp << "\n\tret";
+            temp << "\n\tpop rbp \n\tret";
             gen->FUNC << temp.str();
             gen->varScopes[f.identifier.value.value()] = scope;
           }
 
           gen->exitScope();
+          gen->currOffset = gen_offset_save;
         }
 
         void operator()(NodeFuncCall fc) {
@@ -981,6 +1039,109 @@ public:
           }
 
           // pass parameters to arguments
+          for (auto &param : fc.params) {
+
+            bool is_valid_p = false;
+            std::string param_name;
+            for (int i = gen->scope_stack.size() - 1; i >= 0; i--) {
+
+              auto scope = gen->varScopes[gen->scope_stack.at(i)];
+              struct pVisitor {
+                NodeParam *param;
+                std::string *param_name;
+                bool *is_valid_p;
+                std::vector<Var> *scope;
+                AsmGen *gen;
+                std::stringstream *p_ss;
+                void operator()(NodeInt i) {
+
+                  *p_ss << "\n\tmov qword [rbp - " << gen->currOffset * 8
+                        << "], " << i.value.value.value();
+                  param->stackOffset = gen->currOffset++;
+                  *is_valid_p = true;
+                }
+                void operator()(Token t) {
+                  *param_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                                gen->scope_stack.back() + "." + t.value.value();
+                  if (Semantics::find_symbol(*scope, {.value = *param_name},
+                                             Semantics::symtype::scope)) {
+                    *is_valid_p = true;
+                    for (auto &_item : *scope) {
+                      if (_item.name.value == *param_name) {
+                        param->stackOffset = _item.stackOffset;
+                        param->isptr = _item.is_prt;
+                        param->mangled_name = *param_name;
+                        break;
+                      }
+                    }
+                  } else {
+                    puts("Yikes");
+                    exit(1);
+                  }
+                }
+                void operator()(NodeString s) {
+                  std::string name =
+                      "gbval" + std::to_string(gen->gbvalcounter++);
+                  gen->DATA << "\n\t" << name << " db " << s.value.value.value()
+                            << ", 0";
+                  *p_ss << "\n\tmov qword [rbp - " << gen->currOffset * 8
+                        << "], " << name;
+                  param->stackOffset = gen->currOffset++;
+                  param->isptr = true;
+                  param->mangled_name = name;
+                  *is_valid_p = true;
+                }
+              };
+              std::visit(
+                  pVisitor{&param, &param_name, &is_valid_p, &scope, gen, p_ss},
+                  param.value);
+              if (!is_valid_p) {
+                puts("Yikes That shi don exists");
+                exit(1);
+              } else {
+                break;
+              }
+            }
+          }
+          auto param_count = fc.params.size();
+
+          for (int i = 0; i < param_count; i++) {
+            bool is_ptr = (fc.params.at(i).isptr) ? true : false;
+            NodeParam param = fc.params.at(i);
+
+            switch (i) {
+            case 0:
+              if (!is_ptr)
+                *p_ss << "\n\tmov rdi, [rbp - " << param.stackOffset * 8 << "]";
+              else
+                *p_ss << "\n\tmov rdi, " << param.mangled_name;
+
+              break;
+            case 1:
+              if (!is_ptr)
+                *p_ss << "\n\tmov rsi, [rbp - " << param.stackOffset * 8 << "]";
+              else
+                *p_ss << "\n\tmov rsi, " << param.mangled_name;
+
+              break;
+
+            case 2:
+              if (!is_ptr)
+                *p_ss << "\n\tmov rsi, [rbp - " << param.stackOffset * 8 << "]";
+              else
+                *p_ss << "\n\tmov rsi, " << param.mangled_name;
+
+              break;
+            default:
+              if (!is_ptr)
+                *p_ss << "\n\tpush [rbp - " << param.stackOffset * 8 << "]";
+              else
+                *p_ss << "\n\tpush " << param.mangled_name;
+
+              break;
+            }
+          }
+
           // call the function
           *p_ss << "\n\tcall " + _function_symbol.mangled_name;
         }
@@ -1010,56 +1171,94 @@ public:
                                      name.c_str());
           }
           // layout params
-          Var v;
           for (auto &param : c.params) {
-            std::string param_name;
-            if (gen->scope_stack.back() != "main")
-              param_name = "_Tix_" + gen->cur_nameSpace + "_" +
-                           gen->scope_stack.back() + "." +
-                           param.value.value.value();
-            else
-              param_name = "main." + param.value.value.value();
-            param.value.value = param_name;
-            bool is_valid_p = false;
 
-            printf("%s was given as parameter\n", param_name.c_str());
-            for (auto &_scope : gen->varScopes) {
-              if (Semantics::find_symbol(_scope.second, param.value,
-                                         Semantics::symtype::scope)) {
-                is_valid_p = true;
-                for (auto &_item : _scope.second) {
-                  if (_item.name.value == param.value.value) {
-                    v = _item;
-                    param.stackOffset = _item.stackOffset;
+            bool is_valid_p = false;
+            std::string param_name;
+            for (int i = gen->scope_stack.size() - 1; i >= 0; i--) {
+
+              auto scope = gen->varScopes[gen->scope_stack.at(i)];
+              struct pVisitor {
+                NodeParam *param;
+                std::string *param_name;
+                bool *is_valid_p;
+                std::vector<Var> *scope;
+                AsmGen *gen;
+                std::stringstream *p_ss;
+                void operator()(NodeInt i) {
+                  *p_ss << "\n\tmov qword [rbp - " << gen->currOffset * 8
+                        << "], " << i.value.value.value();
+                  param->stackOffset = gen->currOffset++;
+                  *is_valid_p = true;
+                }
+                void operator()(Token t) {
+                  for (int i = gen->scope_stack.size() - 1; i >= 0; i--) {
+                    *param_name = "_Tix_" + gen->cur_nameSpace + "_" +
+                                  gen->scope_stack.at(i) + "." +
+                                  t.value.value();
+                    auto scope = gen->varScopes[gen->scope_stack.at(i)];
+                    printf("%s is testing as parameter in %s\n",
+                           param_name->c_str(), gen->scope_stack.at(i).c_str());
+                    *is_valid_p = true;
+                    for (auto &_item : scope) {
+                      if (_item.name.value == *param_name) {
+                        printf("Yyayayaya %s \n", param_name->c_str());
+                        *is_valid_p = true;
+                        param->stackOffset = _item.stackOffset;
+                        param->isptr = _item.is_prt;
+                        param->mangled_name = *param_name;
+                        break;
+                      }
+                    }
                   }
                 }
+                void operator()(NodeString s) {
+                  std::string name =
+                      "gbval" + std::to_string(gen->gbvalcounter++);
+                  gen->DATA << "\n\t" << name << " db " << s.value.value.value()
+                            << ", 0";
+                  *p_ss << "\n\tmov qword [rbp - " << gen->currOffset * 8
+                        << "], " << name;
+                  param->stackOffset = gen->currOffset++;
+                  *is_valid_p = true;
+                }
+              };
+              std::visit(
+                  pVisitor{&param, &param_name, &is_valid_p, &scope, gen, p_ss},
+                  param.value);
+
+              if (!is_valid_p) {
+                puts("Yikes That shi don exists");
+                exit(1);
+              } else {
                 break;
               }
             }
-
-            // TODO : Check bundled symbols for the parameter
-            /*if (!is_valid_p)*/
-            /*  Semantics::Throw_Error("'%s' was not declared in this scope",*/
-            /*                         param.value.value.value().c_str());*/
           }
+
           auto param_count = c.params.size();
+
           for (int i = 0; i < param_count; i++) {
-            bool is_ptr = (c.params.at(i).value.is_ptr) ? true : false;
-            auto param = c.params.at(i);
+            bool is_ptr = (c.params.at(i).isptr) ? true : false;
+            NodeParam param = c.params.at(i);
+
             switch (i) {
             case 0:
-              *p_ss << "\n\tmov rdi, qword [rbp + " << param.stackOffset * 8
-                    << "]";
+              if (!is_ptr)
+                *p_ss << "\n\tmov rdi, [rbp - " << param.stackOffset * 8 << "]";
+              else
+                *p_ss << "\n\tmov rdi, " << param.mangled_name;
+
               break;
             case 1:
-              *p_ss << "\n\tmov rsi, [rbp + " << param.stackOffset * 8 << "]";
+              *p_ss << "\n\tmov rsi, [rbp - " << param.stackOffset * 8 << "]";
               break;
 
             case 2:
-              *p_ss << "\n\tmov rdx, [rbp + " << param.stackOffset * 8 << "]";
+              *p_ss << "\n\tmov rdx, [rbp - " << param.stackOffset * 8 << "]";
               break;
             default:
-              *p_ss << "\n\tpush [rbp + " << param.stackOffset * 8 << "]";
+              *p_ss << "\n\tpush [rbp - " << param.stackOffset * 8 << "]";
               break;
             }
           }

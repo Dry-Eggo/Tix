@@ -12,6 +12,8 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
   /usr/include/c++/14/algorithm \
+  /usr/include/c++/14/array \
+  /usr/include/c++/14/atomic \
   /usr/include/c++/14/backward/auto_ptr.h \
   /usr/include/c++/14/backward/binders.h \
   /usr/include/c++/14/bit \
@@ -47,6 +49,8 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/bits/functexcept.h \
   /usr/include/c++/14/bits/functional_hash.h \
   /usr/include/c++/14/bits/hash_bytes.h \
+  /usr/include/c++/14/bits/hashtable.h \
+  /usr/include/c++/14/bits/hashtable_policy.h \
   /usr/include/c++/14/bits/invoke.h \
   /usr/include/c++/14/bits/ios_base.h \
   /usr/include/c++/14/bits/istream.tcc \
@@ -79,6 +83,7 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/bits/shared_ptr_base.h \
   /usr/include/c++/14/bits/sstream.tcc \
   /usr/include/c++/14/bits/std_abs.h \
+  /usr/include/c++/14/bits/std_function.h \
   /usr/include/c++/14/bits/stl_algo.h \
   /usr/include/c++/14/bits/stl_algobase.h \
   /usr/include/c++/14/bits/stl_bvector.h \
@@ -90,6 +95,7 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/bits/stl_iterator_base_types.h \
   /usr/include/c++/14/bits/stl_map.h \
   /usr/include/c++/14/bits/stl_multimap.h \
+  /usr/include/c++/14/bits/stl_numeric.h \
   /usr/include/c++/14/bits/stl_pair.h \
   /usr/include/c++/14/bits/stl_raw_storage_iter.h \
   /usr/include/c++/14/bits/stl_relops.h \
@@ -97,12 +103,14 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/bits/stl_tree.h \
   /usr/include/c++/14/bits/stl_uninitialized.h \
   /usr/include/c++/14/bits/stl_vector.h \
+  /usr/include/c++/14/bits/stream_iterator.h \
   /usr/include/c++/14/bits/streambuf.tcc \
   /usr/include/c++/14/bits/streambuf_iterator.h \
   /usr/include/c++/14/bits/string_view.tcc \
   /usr/include/c++/14/bits/stringfwd.h \
   /usr/include/c++/14/bits/uniform_int_dist.h \
   /usr/include/c++/14/bits/unique_ptr.h \
+  /usr/include/c++/14/bits/unordered_map.h \
   /usr/include/c++/14/bits/uses_allocator.h \
   /usr/include/c++/14/bits/uses_allocator_args.h \
   /usr/include/c++/14/bits/utility.h \
@@ -112,6 +120,7 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/cerrno \
   /usr/include/c++/14/clocale \
   /usr/include/c++/14/codecvt \
+  /usr/include/c++/14/compare \
   /usr/include/c++/14/concepts \
   /usr/include/c++/14/cstdarg \
   /usr/include/c++/14/cstddef \
@@ -125,6 +134,7 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/debug/assertions.h \
   /usr/include/c++/14/debug/debug.h \
   /usr/include/c++/14/exception \
+  /usr/include/c++/14/execution \
   /usr/include/c++/14/ext/aligned_buffer.h \
   /usr/include/c++/14/ext/alloc_traits.h \
   /usr/include/c++/14/ext/atomicity.h \
@@ -134,23 +144,43 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/ext/type_traits.h \
   /usr/include/c++/14/filesystem \
   /usr/include/c++/14/fstream \
+  /usr/include/c++/14/functional \
   /usr/include/c++/14/initializer_list \
   /usr/include/c++/14/iomanip \
   /usr/include/c++/14/ios \
   /usr/include/c++/14/iosfwd \
   /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
+  /usr/include/c++/14/iterator \
   /usr/include/c++/14/limits \
   /usr/include/c++/14/locale \
   /usr/include/c++/14/map \
   /usr/include/c++/14/memory \
   /usr/include/c++/14/new \
+  /usr/include/c++/14/numeric \
   /usr/include/c++/14/optional \
   /usr/include/c++/14/ostream \
+  /usr/include/c++/14/pstl/algorithm_fwd.h \
+  /usr/include/c++/14/pstl/algorithm_impl.h \
   /usr/include/c++/14/pstl/execution_defs.h \
+  /usr/include/c++/14/pstl/execution_impl.h \
   /usr/include/c++/14/pstl/glue_algorithm_defs.h \
+  /usr/include/c++/14/pstl/glue_algorithm_impl.h \
+  /usr/include/c++/14/pstl/glue_execution_defs.h \
   /usr/include/c++/14/pstl/glue_memory_defs.h \
+  /usr/include/c++/14/pstl/glue_memory_impl.h \
+  /usr/include/c++/14/pstl/glue_numeric_defs.h \
+  /usr/include/c++/14/pstl/glue_numeric_impl.h \
+  /usr/include/c++/14/pstl/memory_impl.h \
+  /usr/include/c++/14/pstl/numeric_fwd.h \
+  /usr/include/c++/14/pstl/numeric_impl.h \
+  /usr/include/c++/14/pstl/parallel_backend.h \
+  /usr/include/c++/14/pstl/parallel_backend_serial.h \
+  /usr/include/c++/14/pstl/parallel_backend_utils.h \
+  /usr/include/c++/14/pstl/parallel_impl.h \
   /usr/include/c++/14/pstl/pstl_config.h \
+  /usr/include/c++/14/pstl/unseq_backend_simd.h \
+  /usr/include/c++/14/pstl/utils.h \
   /usr/include/c++/14/ratio \
   /usr/include/c++/14/sstream \
   /usr/include/c++/14/stdexcept \
@@ -161,6 +191,7 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
   /usr/include/c++/14/tuple \
   /usr/include/c++/14/type_traits \
   /usr/include/c++/14/typeinfo \
+  /usr/include/c++/14/unordered_map \
   /usr/include/c++/14/utility \
   /usr/include/c++/14/variant \
   /usr/include/c++/14/vector \
@@ -287,9 +318,45 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h:
 
-/usr/include/c++/14/ext/alloc_traits.h:
+/usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h:
 
-/usr/include/c++/14/debug/assertions.h:
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
 
 /usr/include/c++/14/cstring:
 
@@ -303,19 +370,15 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/cstddef:
 
-/usr/include/c++/14/cstdarg:
-
-/usr/include/c++/14/bits/unique_ptr.h:
-
-/usr/include/c++/14/debug/debug.h:
-
-/usr/include/errno.h:
+/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
 /usr/include/c++/14/bits/version.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/include/stddef.h:
 
 /usr/include/c++/14/bits/vector.tcc:
+
+/usr/include/c++/14/bits/unordered_map.h:
 
 /usr/include/c++/14/bits/shared_ptr_base.h:
 
@@ -325,9 +388,13 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/streambuf_iterator.h:
 
+/usr/include/c++/14/bits/stream_iterator.h:
+
 /usr/include/c++/14/bits/stl_tempbuf.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
+/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
+
+/usr/include/c++/14/bits/stl_relops.h:
 
 /usr/include/features-time64.h:
 
@@ -339,17 +406,15 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
 /usr/include/c++/14/bits/stl_iterator_base_funcs.h:
-
-/usr/include/c++/14/ctime:
-
-/usr/include/c++/14/ext/numeric_traits.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/c++/14/bits/stl_heap.h:
+
+/usr/include/c++/14/functional:
+
+/usr/include/c++/14/pstl/unseq_backend_simd.h:
 
 /usr/include/c++/14/bits/std_abs.h:
 
@@ -357,17 +422,11 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/shared_ptr_atomic.h:
 
-/usr/include/c++/14/bits/stl_relops.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
-
 /usr/include/c++/14/codecvt:
 
 /usr/include/c++/14/bits/requires_hosted.h:
 
 /usr/include/c++/14/iostream:
-
-/usr/include/strings.h:
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
@@ -381,11 +440,19 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/predefined_ops.h:
 
-/usr/include/c++/14/bits/stl_bvector.h:
+/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
 
-/usr/include/c++/14/bits/new_allocator.h:
+/usr/include/asm-generic/errno.h:
+
+/usr/include/c++/14/bits/stl_numeric.h:
+
+/usr/include/c++/14/pstl/parallel_backend_serial.h:
 
 /usr/include/c++/14/bits/locale_classes.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h:
+
+/usr/include/c++/14/clocale:
 
 /usr/include/c++/14/bits/stl_vector.h:
 
@@ -393,13 +460,35 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/nested_exception.h:
 
-/usr/include/c++/14/bits/stl_algobase.h:
+/usr/include/c++/14/compare:
 
-/usr/include/asm-generic/errno-base.h:
+/usr/include/x86_64-linux-gnu/bits/endian.h:
 
-/usr/include/c++/14/bits/stl_iterator.h:
+/usr/include/c++/14/ostream:
 
-/usr/include/c++/14/bits/allocated_ptr.h:
+/usr/include/c++/14/bits/parse_numbers.h:
+
+/usr/include/features.h:
+
+/usr/include/c++/14/bits/node_handle.h:
+
+/usr/include/c++/14/bits/memoryfwd.h:
+
+/usr/include/c++/14/bits/memory_resource.h:
+
+/usr/include/c++/14/bits/uses_allocator.h:
+
+/usr/include/c++/14/bits/sstream.tcc:
+
+/usr/include/c++/14/bits/localefwd.h:
+
+/usr/include/c++/14/pstl/parallel_backend.h:
+
+/usr/include/c++/14/iterator:
+
+/usr/include/c++/14/bits/unique_ptr.h:
+
+/usr/include/c++/14/cstdarg:
 
 /usr/include/c++/14/bits/stl_uninitialized.h:
 
@@ -410,6 +499,14 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 /usr/include/c++/14/bits/atomic_base.h:
 
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
+
+/usr/include/c++/14/bits/stl_algobase.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/c++/14/bits/stl_iterator.h:
+
+/usr/include/c++/14/bits/allocated_ptr.h:
 
 /usr/include/c++/14/bits/stl_raw_storage_iter.h:
 
@@ -423,13 +520,13 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/iosfwd:
 
-/usr/include/c++/14/bits/memory_resource.h:
-
 /usr/include/x86_64-linux-gnu/asm/errno.h:
 
 /usr/include/c++/14/bits/cxxabi_forced.h:
 
-/usr/include/c++/14/new:
+/usr/include/endian.h:
+
+/usr/include/stdint.h:
 
 /usr/include/c++/14/bits/stl_tree.h:
 
@@ -449,6 +546,20 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/backward/binders.h:
 
+/usr/include/c++/14/array:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/c++/14/bits/hash_bytes.h:
+
+/usr/include/c++/14/bits/char_traits.h:
+
+/usr/include/c++/14/bits/hashtable.h:
+
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
+
+/home/dry/Documents/Eggo/Tix/headers/_glob_symbols.hpp:
+
 /usr/include/c++/14/bits/stl_multimap.h:
 
 /usr/include/c++/14/bits/erase_if.h:
@@ -457,23 +568,51 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/uses_allocator_args.h:
 
-/home/dry/Documents/Eggo/Tix/headers/asmgen.hpp:
-
 /usr/include/c++/14/bits/atomic_lockfree_defines.h:
 
 /usr/include/c++/14/bits/streambuf.tcc:
 
 /usr/include/c++/14/ios:
 
-/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
-
 /home/dry/Documents/Eggo/Tix/src/eggo.cpp:
 
-/home/dry/Documents/Eggo/Tix/headers/eggoLog.hpp:
+/usr/include/c++/14/bits/stl_bvector.h:
 
-/usr/include/c++/14/bits/locale_facets.h:
+/usr/include/c++/14/bits/new_allocator.h:
 
-/usr/include/c++/14/bits/basic_string.h:
+/usr/include/c++/14/pstl/memory_impl.h:
+
+/usr/include/c++/14/bits/shared_ptr.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
+
+/usr/include/c++/14/bits/uniform_int_dist.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
+
+/usr/include/c++/14/backward/auto_ptr.h:
+
+/usr/include/c++/14/bits/move.h:
+
+/usr/include/c++/14/pstl/glue_numeric_defs.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h:
+
+/usr/include/c++/14/cerrno:
+
+/home/dry/Documents/Eggo/Tix/headers/lexer.hpp:
+
+/usr/include/c++/14/algorithm:
+
+/usr/include/c++/14/istream:
+
+/usr/include/stdlib.h:
+
+/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
+
+/usr/include/c++/14/bits/exception_defines.h:
+
+/usr/include/x86_64-linux-gnu/bits/locale.h:
 
 /usr/include/c++/14/bits/charconv.h:
 
@@ -491,27 +630,7 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/alloca.h:
 
-/home/dry/Documents/Eggo/Tix/headers/lexer.hpp:
-
-/usr/include/c++/14/algorithm:
-
-/usr/include/c++/14/istream:
-
-/usr/include/stdlib.h:
-
-/usr/include/x86_64-linux-gnu/bits/locale.h:
-
-/usr/include/c++/14/bits/shared_ptr.h:
-
-/usr/include/c++/14/bits/uniform_int_dist.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
-
-/usr/include/c++/14/backward/auto_ptr.h:
-
-/usr/include/c++/14/bits/move.h:
+/usr/include/c++/14/bits/ios_base.h:
 
 /usr/include/c++/14/bits/stl_pair.h:
 
@@ -529,8 +648,6 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/exception.h:
 
-/usr/include/c++/14/bits/char_traits.h:
-
 /usr/include/c++/14/cstdio:
 
 /usr/include/c++/14/bits/utility.h:
@@ -539,17 +656,13 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/locale_classes.tcc:
 
-/usr/include/c++/14/cwctype:
+/usr/include/c++/14/bits/locale_facets.h:
 
-/usr/include/c++/14/bits/ostream.tcc:
-
-/usr/include/c++/14/bits/align.h:
-
-/usr/include/c++/14/ext/aligned_buffer.h:
-
-/usr/include/c++/14/bits/concept_check.h:
+/usr/include/c++/14/bits/basic_string.h:
 
 /usr/include/c++/14/bits/cpp_type_traits.h:
+
+/usr/include/c++/14/pstl/glue_memory_impl.h:
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
 
@@ -561,19 +674,17 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/string_view:
 
+/usr/include/c++/14/bits/std_function.h:
+
 /usr/include/c++/14/bits/enable_special_members.h:
-
-/usr/include/c++/14/ext/atomicity.h:
-
-/usr/include/c++/14/map:
 
 /usr/include/c++/14/concepts:
 
 /usr/include/c++/14/bits/fs_ops.h:
 
-/usr/include/c++/14/bits/invoke.h:
+/usr/include/c++/14/bits/hashtable_policy.h:
 
-/usr/include/c++/14/bits/ios_base.h:
+/usr/include/c++/14/bits/invoke.h:
 
 /usr/include/c++/14/bits/codecvt.h:
 
@@ -585,35 +696,51 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/bits/exception_ptr.h:
 
+/usr/include/c++/14/ext/alloc_traits.h:
+
 /usr/include/stdio.h:
 
 /usr/include/c++/14/bits/locale_facets_nonio.h:
 
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h:
+/usr/include/c++/14/ext/numeric_traits.h:
 
-/usr/include/c++/14/bits/uses_allocator.h:
+/usr/include/c++/14/ctime:
 
-/usr/include/c++/14/bits/sstream.tcc:
+/usr/include/c++/14/cwctype:
 
-/usr/include/c++/14/bits/localefwd.h:
+/usr/include/c++/14/debug/assertions.h:
 
-/usr/include/stdint.h:
+/usr/include/c++/14/debug/debug.h:
 
-/usr/include/endian.h:
+/usr/include/errno.h:
 
-/usr/include/x86_64-linux-gnu/bits/endian.h:
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
-/usr/include/c++/14/ostream:
+/usr/include/c++/14/atomic:
 
-/usr/include/c++/14/bits/parse_numbers.h:
+/usr/include/c++/14/exception:
 
-/usr/include/features.h:
+/usr/include/c++/14/execution:
 
-/usr/include/c++/14/bits/node_handle.h:
+/usr/include/c++/14/bits/ostream.tcc:
 
-/usr/include/c++/14/bits/memoryfwd.h:
+/usr/include/c++/14/bits/align.h:
+
+/usr/include/c++/14/bits/concept_check.h:
+
+/usr/include/c++/14/ext/aligned_buffer.h:
+
+/usr/include/c++/14/new:
+
+/usr/include/c++/14/pstl/utils.h:
+
+/usr/include/c++/14/ext/atomicity.h:
+
+/usr/include/c++/14/map:
 
 /usr/include/c++/14/ext/concurrence.h:
+
+/usr/include/c++/14/pstl/numeric_impl.h:
 
 /usr/include/c++/14/ext/string_conversions.h:
 
@@ -627,13 +754,31 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/iomanip:
 
-/usr/include/c++/14/exception:
-
-/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+/usr/include/c++/14/pstl/algorithm_fwd.h:
 
 /usr/include/c++/14/bits/stl_function.h:
 
 /usr/include/c++/14/memory:
+
+/usr/include/c++/14/pstl/algorithm_impl.h:
+
+/usr/include/c++/14/pstl/execution_impl.h:
+
+/usr/include/c++/14/pstl/glue_execution_defs.h:
+
+/usr/include/c++/14/numeric:
+
+/home/dry/Documents/Eggo/Tix/headers/eggoLog.hpp:
+
+/usr/include/c++/14/pstl/glue_numeric_impl.h:
+
+/usr/include/c++/14/pstl/numeric_fwd.h:
+
+/usr/include/c++/14/pstl/parallel_backend_utils.h:
+
+/usr/include/strings.h:
+
+/usr/include/c++/14/pstl/parallel_impl.h:
 
 /usr/include/x86_64-linux-gnu/bits/sched.h:
 
@@ -649,17 +794,25 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/c++/14/type_traits:
 
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
 /usr/include/c++/14/typeinfo:
+
+/home/dry/Documents/Eggo/Tix/headers/asmgen.hpp:
+
+/usr/include/c++/14/unordered_map:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/include/stdarg.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
+
+/usr/include/c++/14/pstl/execution_defs.h:
+
+/usr/include/c++/14/utility:
 
 /usr/include/x86_64-linux-gnu/bits/floatn-common.h:
 
 /usr/include/c++/14/bits/locale_facets.tcc:
 
 /usr/include/c++/14/variant:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h:
 
 /home/dry/Documents/Eggo/Tix/headers/parser.hpp:
 
@@ -693,8 +846,6 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
-
 /usr/include/c++/14/bits/postypes.h:
 
 /usr/include/c++/14/initializer_list:
@@ -704,6 +855,8 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 /usr/include/time.h:
 
 /usr/include/x86_64-linux-gnu/bits/setjmp.h:
+
+/usr/include/c++/14/pstl/glue_algorithm_impl.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
 
@@ -717,9 +870,9 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
 
-/home/dry/Documents/Eggo/Tix/headers/_glob_symbols.hpp:
+/usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h:
 
-/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
+/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
 
 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
 
@@ -741,68 +894,8 @@ CMakeFiles/tix.dir/src/eggo.cpp.o: /home/dry/Documents/Eggo/Tix/src/eggo.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
 
-/usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
-
-/usr/include/c++/14/bits/exception_defines.h:
-
-/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/14/include/stdarg.h:
-
-/usr/include/c++/14/pstl/execution_defs.h:
-
-/usr/include/c++/14/utility:
-
-/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
-
-/usr/include/asm-generic/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/typesizes.h:
-
-/usr/include/c++/14/bits/hash_bytes.h:
-
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
-
-/usr/include/x86_64-linux-gnu/sys/cdefs.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h:
-
-/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h:
-
-/usr/include/c++/14/cerrno:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h:
-
-/usr/include/c++/14/clocale:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h:

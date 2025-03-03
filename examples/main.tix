@@ -1,19 +1,25 @@
-extern std_print_string(m: str);
-extern std_print_int(m: int);
-extern std_flush();
-extern std_getch(m : int, dst : str);
-extern std_print_ch(m: str);
+extern tixc_print(m : str);
+extern tixc_print_buf(m : str);
+extern tixc_print_int(i:int);
+extern tixc_read(m:dst);
+extern tixc_strjoin(m:str, d:str, e:str);
+extern strcat(m:str, d:str);
+extern printf(fmt : str);
 
-
-mkf main()
+mkf input(m: str) : str
 {
-	mk name: str;
-	mk ds:int = 0;
-	
-	for(i : int = 0; i < 10; i+=1)
-	{
-		call std_getch(ds, name);
-		call std_print_ch(name);
-	};
-	
+  mk inp : buf;
+
+  call tixc_print(m);
+  call tixc_read(inp);
+  ret inp;
+};
+
+mkf main() : int 
+{
+  mk string : str = input("What is your name : ");
+  mk out : buf;
+  call tixc_strjoin(out, "Hello, ", string);
+  call tixc_print(out);
+  ret 20;
 };

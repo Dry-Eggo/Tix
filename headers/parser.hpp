@@ -115,9 +115,15 @@ private:
               tkn = consume();
               tkn.is_ptr = true;
             }
-          } else
+            param.value = tkn;
+          } else if (peek()->type == IDENT) {
             tkn = consume();
-          param.value = tkn;
+            param.value = tkn;
+          } else if (peek()->type == INT_LIT) {
+            param.value = NodeInt{.value = consume()};
+          } else if (peek()->type == STRING_LIT) {
+            param.value = NodeString{.value = consume()};
+          }
           call.params.push_back(param);
         }
         if (peek().value().type == TokenType::CPAREN) {
@@ -174,7 +180,8 @@ private:
       mkstmt.identifier = consume();
       if (peek().has_value() && peek()->type == TokenType::TYPE_DEC) {
         consume();
-        if (peek().has_value() && peek()->type == TokenType::TYPE) {
+        if (peek().has_value() && peek()->type == TokenType::TYPE ||
+            peek().has_value() && peek()->type == TokenType::IDENT) {
           // determining type;
 
           if (peek()->value == "str") {
@@ -183,6 +190,8 @@ private:
             mkstmt.type = DataType::INT;
           } else if (peek()->value == "bool") {
             mkstmt.type = DataType::BOOL;
+          } else if (peek()->value == "buf") {
+            mkstmt.type = DataType::R_PTR_T;
           }
 
           consume();
@@ -249,6 +258,7 @@ private:
       consume(); // opening parenthesis
       if (peek().has_value() && peek()->type != TokenType::CPAREN) {
         while (peek().has_value() && peek()->type != TokenType::CPAREN) {
+          NodeParam param;
           Token tkn;
           if (peek()->type == R_PTR) {
             consume();
@@ -256,10 +266,15 @@ private:
               tkn = consume();
               tkn.is_ptr = true;
             }
-          } else {
+            param.value = tkn;
+          } else if (peek()->type == IDENT) {
             tkn = consume();
+            param.value = tkn;
+          } else if (peek()->type == INT_LIT) {
+            param.value = NodeInt{.value = consume()};
+          } else if (peek()->type == STRING_LIT) {
+            param.value = NodeString{.value = consume()};
           }
-          NodeParam param = {.value = tkn};
           fcall.params.push_back(param);
           param_count++;
         }
@@ -470,14 +485,18 @@ private:
             param.identifier = consume();
             if (peek().has_value() && peek()->type == TokenType::TYPE_DEC) {
               consume();
-              if (peek().has_value() && peek()->type == TokenType::TYPE) {
+              if (peek().has_value() && peek()->type == TokenType::TYPE ||
+                  peek().has_value() && peek()->type == TokenType::IDENT) {
                 if (peek()->value == "str") {
                   param.type = DataType::STR;
                 } else if (peek()->value == "int") {
                   param.type = DataType::INT;
                 } else if (peek()->value == "bool") {
                   param.type = DataType::BOOL;
+                } else if (peek()->value == "buf") {
+                  param.type = DataType::R_PTR_T;
                 }
+
                 consume();
                 func_stmt.params.push_back(param);
                 param_count++;
@@ -506,8 +525,10 @@ private:
       if (peek().has_value() && peek()->type == TokenType::OBRACE) {
         consume();
       }
+      bool found_ret = false;
       if (peek()->type != CBRACE) {
-        while (peek().has_value() && peek()->type != TokenType::CBRACE) {
+        while (peek().has_value() && peek()->type != TokenType::CBRACE &&
+               !found_ret) {
           if (peek()->type == TokenType::MK) {
             parse_mk_stmt(func_stmt.body);
           } else if (peek()->type == TokenType::IDENT) {
@@ -529,6 +550,7 @@ private:
           } else if (peek()->type == RET) {
             consume();
             NodeRet ret;
+            found_ret = true;
             switch (peek().value().type) {
             case INT_LIT:
               if (func_stmt.ret_type != DataType::INT) {
@@ -561,6 +583,7 @@ private:
           } // consume();
         }
       }
+
       if (peek()->type == CBRACE) {
         consume(); // closing curly
         if (peek()->type == SEMI)
@@ -568,6 +591,13 @@ private:
       }
       // consume();
       func_stmt.param_count = param_count;
+
+      if (func_stmt.has_ret && !found_ret) {
+        printf("This Function must return a value(%s)\n",
+
+               func_stmt.identifier.value->c_str());
+        exit(1);
+      }
       stmt.var = func_stmt;
       stmts.push_back(stmt);
     }
