@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/tixc.dir/main.cpp.o CMakeFiles/tixc.dir/src/backend/generator.cpp.o CMakeFiles/tixc.dir/src/tix.cpp.o CMakeFiles/tixc.dir/std/tix_rt.cpp.o -o out/tixc  -L/usr/lib/llvm-19/lib -lLLVM-19

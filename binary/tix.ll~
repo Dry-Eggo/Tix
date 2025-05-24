@@ -1,0 +1,16 @@
+; ModuleID = '../tests/test001.tx'
+source_filename = "../tests/test001.tx"
+
+define i32 @foo() {
+entry:
+  ret i32 0
+}
+
+define i32 @main() {
+entry:
+  %foo = alloca i32, align 4
+  %age = alloca fp128, align 16
+  store i32 40, ptr %age, align 4
+  store i32 50, ptr %foo, align 4
+  ret i32 0
+}

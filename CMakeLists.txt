@@ -1,0 +1,42 @@
+
+cmake_minimum_required(VERSION 3.10)
+project(tixc LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CXX_COMPILER clang)
+
+find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config REQUIRED)
+
+execute_process(
+	COMMAND ${LLVM_CONFIG_EXECUTABLE} --cxxflags
+	OUTPUT_VARIABLE LLVM_CXXFLAGS
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+	COMMAND ${LLVM_CONFIG_EXECUTABLE} --ldflags
+	OUTPUT_VARIABLE LLVM_LDFLAGS
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+	COMMAND ${LLVM_CONFIG_EXECUTABLE} --libs core irreader support
+	OUTPUT_VARIABLE LLVM_LIBS
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+	COMMAND ${LLVM_CONFIG_EXECUTABLE} --system-libs
+	OUTPUT_VARIABLE LLVM_SYSLIBS
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+message(STATUS "LLVM CXXFLAGS: ${LLVM_CXXFLAGS}")
+
+add_compile_options(${LLVM_CXXFLAGS})
+link_libraries(${LLVM_LDFLAGS} ${LLVM_LIBS} ${LLVM_SYSLIBS})
+file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "./main.cpp" "./std/*.cpp" "./src/*.cpp")
+add_executable(tixc ${SRC})
+
+set_target_properties(tixc PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./out")

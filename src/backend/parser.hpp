@@ -1,0 +1,273 @@
+#pragma once
+
+#include "../tix.hpp"
+#include "function.hpp"
+#include "node.hpp"
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+static std::map<std::string, int> precedence = {
+    {"=", 1}, {"+", 10}, {"-", 10}, {"*", 20}, {"/", 20}};
+
+struct TixParser {
+  TixCompiler *process;
+  TixParser(TixCompiler *process) {
+    this->process = process;
+    this->stream = process->tokens;
+
+    AST *ast = this->parse();
+    this->process->ast = ast;
+  }
+
+  std::unique_ptr<FnDecl> parse_function() {
+    std::unique_ptr<FnDecl> fn = std::make_unique<FnDecl>(FnDecl{});
+    this->advance(); // skip the keyword
+    if (this->peek().kind == TokenKind::IDENT) {
+      fn->name = this->advance().data;
+    }
+    expect_separator("(");
+    auto args = this->parse_args();
+    expect_separator(")");
+    if (peek().kind == TokenKind::SEPARATOR && peek().data == ":") {
+      expect_separator(":");
+      fn->return_type = parse_type();
+    }
+    expect_separator("{");
+    fn->body = parse_block();
+    expect_separator("}");
+    return fn;
+  }
+  std::unique_ptr<Stmt> parse_statement();
+  std::unique_ptr<Expr> parse_expression() {
+    if (peek().kind == TokenKind::NUMBER) {
+      std::unique_ptr<LiteralExpr> il = std::make_unique<LiteralExpr>();
+      il->value = std::stoi(advance().data);
+      il->resolved_type = Type{.base = BaseType::I32};
+      return il;
+    } else if (peek().kind == TokenKind::STRINGLIT) {
+      std::unique_ptr<LiteralExpr> e = std::make_unique<LiteralExpr>();
+      e->value = advance().data;
+      e->resolved_type = Type{.base = BaseType::I8, .is_ptr = true};
+      return e;
+    } else if (peek().kind == TokenKind::IDENT ||
+               peek().kind == TokenKind::NUMBER) {
+      auto lhs = parse_term();
+      while (peek().eq(op("+")) || peek().eq(op("-"))) {
+        auto op = advance().data;
+        auto rhs = parse_expression();
+        BinaryExpr *node = new BinaryExpr();
+        node->lhs = std::move(lhs);
+        node->rhs = std::move(rhs);
+        node->op = op;
+        lhs = std::unique_ptr<Expr>(node);
+      }
+      if (peek().eq(op("="))) {
+        advance();
+        auto value = parse_expression();
+        AssignmentExpr *ass_expr = new AssignmentExpr();
+        ass_expr->target = std::move(lhs);
+        ass_expr->op = "=";
+        ass_expr->value = std::move(value);
+        lhs = std::unique_ptr<Expr>(ass_expr);
+      }
+      return std::move(lhs);
+    }
+    printf("Not an expression\n");
+    exit(1);
+  }
+
+private:
+  std::vector<Token> stream;
+  size_t current = 0;
+  bool match(TokenKind type) { return peek().kind == type; }
+  bool check(TokenKind type) const;
+  Token advance() { return this->stream.at(this->current++); }
+  Token peek() const { return this->stream.at(this->current); };
+  Token previous() const { return this->stream.at(this->current - 1); };
+  void consume(TokenKind k, std::string d) {
+    if (this->peek().kind == k && this->peek().data.compare(d) == 0) {
+      this->advance();
+      return;
+    }
+    std::printf("Tix Error: expecting Kind %s but got %s instead\n", d.c_str(),
+                this->peek().data.c_str());
+    exit(1);
+  }
+
+  std::unique_ptr<Expr> parse_primary() {
+    if (peek().kind == TokenKind::IDENT) {
+      auto varexpr = std::make_unique<VarExpr>(advance().data);
+      if (peek().eq(separator("("))) {
+        std::unique_ptr<FunctionCallExpr> fcall =
+            std::make_unique<FunctionCallExpr>();
+        fcall->callee = std::move(varexpr);
+        advance();
+        while (!peek().eq(separator(")"))) {
+          auto arg = parse_expression();
+          fcall->arguments.push_back(std::move(arg));
+          if (peek().eq(separator(","))) {
+            advance();
+          }
+        }
+        expect_separator(")");
+        return std::unique_ptr<Expr>(std::move(fcall));
+      }
+      return std::unique_ptr<Expr>(std::move(varexpr));
+    } else if (peek().kind == TokenKind::NUMBER) {
+      auto i = std::stoi(advance().data);
+      LiteralExpr *litexpr = new LiteralExpr();
+      litexpr->value = i;
+      litexpr->resolved_type = {BaseType::I32};
+      return std::unique_ptr<Expr>(std::move(litexpr));
+    } else if (peek().eq(separator("("))) {
+      advance();
+      auto inner = parse_expression();
+      expect_separator(")");
+      return inner;
+    }
+
+    printf("Error Parsing Expr");
+    exit(1);
+  }
+  std::unique_ptr<Expr> parse_term() {
+    auto lhs = parse_primary();
+    while (peek().eq(op("*")) || peek().eq(op("/"))) {
+      auto op = advance().data;
+      auto rhs = parse_expression();
+      BinaryExpr *node = new BinaryExpr();
+      node->lhs = std::move(lhs);
+      node->op = op;
+      node->rhs = std::move(rhs);
+      lhs = std::unique_ptr<Expr>(node);
+    }
+    return lhs;
+  }
+  std::unique_ptr<Expr> parse_unary();
+  std::unique_ptr<Expr> parse_binary(int prec = 0);
+  std::unique_ptr<VarDecl> parse_var_decl() {
+    bool is_mutable = false;
+    std::unique_ptr<VarDecl> v = std::make_unique<VarDecl>();
+    if (peek().kind == TokenKind::KEYWORD) {
+      if (peek().data == "mut") {
+        is_mutable = true;
+        advance();
+      } else if (peek().data == "const") {
+        advance();
+      }
+    }
+    v->name = expect_identifier();
+    expect_separator(":");
+    v->type = parse_type();
+    expect_operator("=");
+    v->value = parse_expression();
+    expect_separator(";");
+    return v;
+  }
+  std::unique_ptr<AssignmentExpr> parse_assignment();
+  std::unique_ptr<BlockStmt> parse_block() {
+    std::unique_ptr<BlockStmt> b = std::make_unique<BlockStmt>();
+    while (!peek().eq(separator("}"))) {
+      if (peek().eq(keyword("mut")) || peek().eq(keyword("const"))) {
+        auto v = parse_var_decl();
+        b->statements.push_back(std::unique_ptr<Stmt>(std::move(v)));
+      } else {
+        auto v = std::make_unique<ExprStmt>();
+        v->expr = std::move(parse_expression());
+        b->statements.push_back(std::unique_ptr<Stmt>(std::move(v)));
+        expect_separator(";");
+      }
+    }
+    return b;
+  }
+  std::vector<std::pair<std::string, Type>> parse_args() {
+    params args;
+    while (this->peek().kind != TokenKind::SEPARATOR && peek().data != ")") {
+      std::string name;
+      Type ty;
+      if (match(TokenKind::IDENT)) {
+        name = advance().data;
+      }
+      expect_separator(":");
+      ty = parse_type();
+      args.push_back({name, ty});
+      if (peek().kind == TokenKind::SEPARATOR && peek().data == ",") {
+        expect_separator(",");
+        continue;
+      }
+    }
+    return args;
+  }
+  Type parse_type() {
+    switch (peek().kind) {
+    case TokenKind::KEYWORD: {
+      auto key = advance().data;
+      if (key == "i8")
+        return {BaseType::I8};
+      else if (key == "i16")
+        return {.base = BaseType::I16};
+      else if (key == "i32")
+        return {.base = BaseType::I32};
+      else if (key == "i64")
+        return {BaseType::I64};
+      else if (key == "u8")
+        return {BaseType::U8};
+      else if (key == "u16")
+        return {.base = BaseType::U16};
+      else if (key == "u32")
+        return {.base = BaseType::U32};
+      else if (key == "u64")
+        return {BaseType::U64};
+      else if (key == "str")
+        return {.base = BaseType::Str};
+      break;
+    }
+    default:
+      break;
+    }
+    std::printf("Expected A type\n");
+    exit(1);
+  }
+  void expect_separator(const char *sep) {
+    if (peek().data != sep) {
+      printf("Expected Separator '%s'. got '%s' instead\n", sep,
+             peek().data.c_str());
+      exit(1);
+    }
+    advance();
+  }
+  void expect_operator(const char *op) {
+    if (peek().data != op) {
+      printf("Expected Operator '%s'. got '%s' instead\n", op,
+             peek().data.c_str());
+      exit(1);
+    }
+    advance();
+  }
+  std::string expect_identifier() {
+    if (peek().kind == TokenKind::IDENT) {
+      auto ident = peek().data;
+      advance();
+      return ident;
+    }
+    printf("Expected an identifier\n");
+    exit(1);
+  }
+
+  AST *parse() {
+    AST *ast = new AST();
+    while (this->peek().kind != TokenKind::TXEOF) {
+      if (this->peek().kind == TokenKind::KEYWORD &&
+          this->peek().data == "fn") {
+        ast->functions.push_back(this->parse_function());
+      } else
+        this->advance();
+    }
+
+    return ast;
+  }
+};

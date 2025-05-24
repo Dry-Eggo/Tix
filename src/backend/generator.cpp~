@@ -1,0 +1,130 @@
+#include "generator.hpp"
+#include "context.hpp"
+#include "node.hpp"
+#include "variable.hpp"
+#include <cstdio>
+#include <iostream>
+#include <llvm/ADT/STLExtras.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/Constant.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Value.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/raw_ostream.h>
+#include <memory>
+#include <system_error>
+#include <variant>
+
+std::error_code EC;
+llvm::raw_fd_ostream outfile("tix.ll", EC, llvm::sys::fs::OF_Text);
+
+Generator::Generator(TixCompiler *process) : builder(context) {
+  this->module = std::make_unique<llvm::Module>(process->input_path, context);
+  for (auto &f : process->ast->functions) {
+    this->gen_function(f.get());
+  }
+  this->module->print(outfile, nullptr);
+  // global context
+  this->current_context = Context();
+}
+
+llvm::Function *Generator::gen_function(FnDecl *fn) {
+  llvm::FunctionType *fntype =
+      llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
+  llvm::Function *func = llvm::Function::Create(
+      fntype, llvm::Function::ExternalLinkage, fn->name, module.get());
+  currentFunction = func;
+  if (!fn->is_extern) {
+    auto entry = llvm::BasicBlock::Create(context, "entry", func);
+    builder.SetInsertPoint(entry);
+  }
+  for (auto &stmt : fn->body->statements) {
+    gen_statement(stmt.get());
+  }
+  builder.CreateRet(llvm::ConstantInt::get(context, llvm::APInt(32, 0)));
+  return func;
+}
+
+llvm::Value *Generator::gen_expression(Expr *e) {
+  if (auto *lit_int = dynamic_cast<LiteralExpr *>(e)) {
+    if (std::holds_alternative<int64_t>(lit_int->value)) {
+      auto i = std::get<int64_t>(lit_int->value);
+      return llvm::ConstantInt::get(
+          resolve_type(lit_int->resolved_type.value()), i);
+    } else if (std::holds_alternative<std::string>(lit_int->value)) {
+      auto s = std::get<std::string>(lit_int->value);
+      return llvm::ConstantDataArray::getString(context, s, true);
+    }
+  }
+  return nullptr;
+}
+
+void Generator::gen_statement(Stmt *stmt) {
+  if (auto *var_stmt = dynamic_cast<VarDecl *>(stmt)) {
+    gen_vardecl(var_stmt);
+  } else if (auto *expr = dynamic_cast<ExprStmt *>(stmt)) {
+    if (auto *as_expr = dynamic_cast<AssignmentExpr *>(expr->expr.get())) {
+      gen_assignment(as_expr);
+    }
+  }
+}
+
+void Generator::gen_assignment(AssignmentExpr *expr) {
+  if (auto *var = dynamic_cast<VarExpr *>(expr->target.get())) {
+    std::cerr << "Subject : " << var->name << "\n";
+    auto symbol = this->current_context->search(var->name);
+    std::cerr << "Here\n";
+    if (!symbol.has_value()) {
+      std::printf("Use of undeclared Identifier '%s'", var->name.c_str());
+      exit(1);
+    }
+
+    llvm::BasicBlock &tmpEntry = currentFunction->getEntryBlock();
+    llvm::IRBuilder<> tmpBuilder(&tmpEntry, tmpEntry.begin());
+    llvm::AllocaInst *ptr = symbol->alloca;
+    builder.CreateStore(gen_expression(expr->value.get()), ptr);
+  }
+}
+
+void Generator::gen_vardecl(VarDecl *v) {
+  auto ty = resolve_type(v->type);
+  printf("Allocated Stack Space for Variable %s\n", v->name.c_str());
+  if (ty == nullptr) {
+    printf("Fatal: Type Resolution: NULL\n");
+  }
+  llvm::BasicBlock &tmpEntry = currentFunction->getEntryBlock();
+  llvm::IRBuilder<> tmpBuilder(&tmpEntry, tmpEntry.begin());
+  llvm::AllocaInst *ptr = tmpBuilder.CreateAlloca(ty, nullptr, v->name.c_str());
+  builder.CreateStore(gen_expression(v->value.get()), ptr);
+  printf("%s Allocation Successful\n", v->name.c_str());
+  Variable var = Variable(v->name, v->type, ptr);
+  this->current_context->add(var);
+}
+
+llvm::Type *Generator::resolve_type(Type t) {
+  switch (t.base) {
+  case BaseType::I32: {
+    auto v = llvm::Type::getInt32Ty(context);
+    printf("Resolved Type To 32bit Int\n");
+    return v;
+  } break;
+  case BaseType::Str: {
+    auto v = llvm::Type::getInt8Ty(context)->getPointerTo();
+    std::printf("Resolved Type To String\n");
+    return v;
+  } break;
+  case BaseType::I8: {
+    auto v = llvm::Type::getInt8Ty(context);
+    return v;
+  }
+  default:
+    return nullptr;
+  }
+}

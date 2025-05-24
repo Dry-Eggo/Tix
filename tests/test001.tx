@@ -1,0 +1,9 @@
+
+fn foo(a: i32) {
+	mut hey: i32 = 40;
+}
+
+fn main() {
+	mut age: str = "Hello";
+	foo(32);
+}

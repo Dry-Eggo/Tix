@@ -1,0 +1,3 @@
+/home/dry/Documents/Eggo/Tix/binary/CMakeFiles/tixc.dir
+/home/dry/Documents/Eggo/Tix/binary/CMakeFiles/edit_cache.dir
+/home/dry/Documents/Eggo/Tix/binary/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,9 @@
+
+fn foo() {
+	
+}
+
+fn main() {
+	mut age: i32 = 40;
+	const foo: i32 = 50;
+}
