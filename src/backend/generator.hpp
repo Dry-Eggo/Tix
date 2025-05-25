@@ -10,7 +10,13 @@
 #include "llvm/IR/Value.h"
 #include <llvm/IR/Function.h>
 #include <memory>
+#include <optional>
 #include <vector>
+
+struct ExprResult {
+  llvm::Value *value;
+  Type type;
+};
 
 struct Generator {
   llvm::LLVMContext context;
@@ -19,17 +25,20 @@ struct Generator {
   llvm::IRBuilder<> builder;
   std::unique_ptr<llvm::Module> module;
   llvm::Function *currentFunction = nullptr;
+  TixCompiler *process;
 
-  void gen_function_call(FunctionCallExpr *expr);
+  ExprResult gen_function_call(FunctionCallExpr *expr);
   void enter_scope();
   void exit_scope();
   void ensure_linear_match(std::string);
+  std::optional<Function> get_function(Expr *);
   Generator(TixCompiler *process);
   llvm::Function *gen_function(FnDecl *);
-  llvm::Value *gen_expression(Expr *);
+  ExprResult gen_expression(Expr *);
   void gen_vardecl(VarDecl *);
   void gen_assignment(AssignmentExpr *);
   void gen_statement(Stmt *);
+  bool type_match(Type, Type);
   llvm::Type *resolve_type(Type);
   void throw_error(std::string msg, int code);
 };

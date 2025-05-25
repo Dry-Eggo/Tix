@@ -1,9 +1,9 @@
 
-fn foo(a: i32) {
+fn foo(a: str): i32 {
 	mut hey: i32 = 40;
 }
 
-fn main() {
+fn main(argc: i32) {
 	mut age: str = "Hello";
-	foo(32);
+	const num: i32 = foo("hello");
 }

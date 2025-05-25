@@ -1,6 +1,5 @@
 #pragma once
 
-#include "llvm/IR/Value.h"
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -44,6 +43,31 @@ struct Type {
     auto t = inner;
     t.is_ptr = true;
     return t;
+  }
+  bool is_integer() {
+    if (is_ptr) {
+      return false;
+    }
+    switch (base) {
+    case I32:
+      return true;
+    case I8:
+      return true;
+    case I16:
+      return true;
+    case I64:
+      return true;
+    case U8:
+      return true;
+    case U16:
+      return true;
+    case U32:
+      return true;
+    case U64:
+      return true;
+    default:
+      return false;
+    }
   }
 };
 
@@ -89,7 +113,7 @@ struct LiteralExpr : Expr {
 
 struct VarExpr : Expr {
   std::string name;
-  VarExpr(std::string n): name(std::move(n)){}
+  VarExpr(std::string n) : name(std::move(n)) {}
   NodeKind kind() const override { return NodeKind::Variable; }
 };
 
@@ -100,7 +124,7 @@ struct BinaryExpr : Expr {
   NodeKind kind() const override { return NodeKind::BinaryOp; }
 };
 
-struct FunctionCallExpr: Expr {
+struct FunctionCallExpr : Expr {
   std::unique_ptr<Expr> callee;
   std::vector<std::unique_ptr<Expr>> arguments;
 };

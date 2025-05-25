@@ -38,8 +38,11 @@ struct TixParser {
       fn->return_type = parse_type();
     }
     expect_separator("{");
+    process->error("Hey", peek().span, "sup");
+    exit(1);
     fn->body = parse_block();
     expect_separator("}");
+    fn->params = args;
     return fn;
   }
   std::unique_ptr<Stmt> parse_statement();
@@ -77,7 +80,7 @@ struct TixParser {
       }
       return std::move(lhs);
     }
-    printf("Not an expression\n");
+    process->error("Expected an Expression", peek().span);
     exit(1);
   }
 

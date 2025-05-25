@@ -1,8 +1,8 @@
 #include "generator.hpp"
 #include "context.hpp"
+#include "function.hpp"
 #include "node.hpp"
 #include "variable.hpp"
-#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -39,8 +39,13 @@ Generator::Generator(TixCompiler *process)
 }
 
 llvm::Function *Generator::gen_function(FnDecl *fn) {
+  std::vector<llvm::Type *> args;
+  for (auto &arg : fn->params) {
+    auto ty = resolve_type(arg.second);
+    args.push_back(ty);
+  }
   llvm::FunctionType *fntype =
-      llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
+      llvm::FunctionType::get(llvm::Type::getInt32Ty(context), args, false);
   llvm::Function *func = llvm::Function::Create(
       fntype, llvm::Function::ExternalLinkage, fn->name, module.get());
   currentFunction = func;
@@ -49,6 +54,18 @@ llvm::Function *Generator::gen_function(FnDecl *fn) {
     builder.SetInsertPoint(entry);
   }
   enter_scope();
+  size_t idx = 0;
+  for (auto &arg : func->args()) {
+    arg.setName(fn->params.at(idx).first);
+    auto *alloca = builder.CreateAlloca(resolve_type(fn->params.at(idx).second),
+                                        nullptr, fn->params.at(idx).first);
+    builder.CreateStore(&arg, alloca);
+    Variable var;
+    var.name = fn->params.at(idx).first;
+    var.alloca = alloca;
+    var.type = fn->params.at(idx).second;
+    idx++;
+  }
   for (auto &stmt : fn->body->statements) {
     gen_statement(stmt.get());
   }
@@ -63,24 +80,37 @@ llvm::Function *Generator::gen_function(FnDecl *fn) {
   return func;
 }
 
-llvm::Value *Generator::gen_expression(Expr *e) {
+ExprResult Generator::gen_expression(Expr *e) {
   if (auto *lit_int = dynamic_cast<LiteralExpr *>(e)) {
     if (std::holds_alternative<int64_t>(lit_int->value)) {
       auto i = std::get<int64_t>(lit_int->value);
-      return llvm::ConstantInt::get(
-          resolve_type(lit_int->resolved_type.value()), i);
+      return {llvm::ConstantInt::get(
+                  resolve_type(lit_int->resolved_type.value()), i),
+              BaseType::I32};
     } else if (std::holds_alternative<std::string>(lit_int->value)) {
       auto s = std::get<std::string>(lit_int->value);
-      return llvm::ConstantDataArray::getString(context, s, true);
+      return {llvm::ConstantDataArray::getString(context, s, true),
+              BaseType::Str};
     }
   } else if (auto *var = dynamic_cast<VarExpr *>(e)) {
     auto v = current_context->search(var->name);
     if (v.has_value()) {
-      return llvm::Value(v->alloca->getType());
+      return {builder.CreateLoad(resolve_type(var->resolved_type.value()),
+                                 v->alloca, v->name),
+              v->type};
     }
+
+    for (auto func : functions) {
+      if (func.name == var->name)
+        if (auto *fn = module->getFunction(var->name))
+          return {fn, func.return_type};
+    }
+  } else if (auto *fncall = dynamic_cast<FunctionCallExpr *>(e)) {
+    auto e = gen_function_call(fncall);
+    return e;
   }
 
-  return nullptr;
+  return {nullptr};
 }
 
 void Generator::gen_statement(Stmt *stmt) {
@@ -96,32 +126,48 @@ void Generator::gen_statement(Stmt *stmt) {
   }
 }
 
-void Generator::gen_function_call(FunctionCallExpr *expr) {
+std::optional<Function> Generator::get_function(Expr *expr) {
+  if (auto *var = dynamic_cast<VarExpr *>(expr)) {
+    for (auto fn : functions) {
+      if (fn.name == var->name) {
+        return fn;
+      }
+    }
+  }
+  return {};
+}
+
+ExprResult Generator::gen_function_call(FunctionCallExpr *expr) {
   auto callee_expr = gen_expression(expr->callee.get());
-  llvm::Function *func = llvm::dyn_cast<llvm::Function>(callee_expr);
+  llvm::Function *func = llvm::dyn_cast<llvm::Function>(callee_expr.value);
   if (!func) {
     throw_error("Attempt To call Non function Value", 1);
   }
+  auto query = get_function(expr->callee.get()).value().args;
   std::vector<llvm::Value *> args;
+  auto idx = 0;
   for (auto &a : expr->arguments) {
     auto arg_expr = gen_expression(a.get());
-    args.push_back(arg_expr);
+    if (!type_match(arg_expr.type, query.at(idx).second)) {
+      throw_error("Parameter-Argument Type Mismatch", 3);
+    }
+    args.push_back(arg_expr.value);
+    idx++;
   }
-  builder.CreateCall(func, args);
+  return {builder.CreateCall(func, args), callee_expr.type};
 }
 
 void Generator::gen_assignment(AssignmentExpr *expr) {
   if (auto *var = dynamic_cast<VarExpr *>(expr->target.get())) {
     auto symbol = this->current_context->search(var->name);
     if (!symbol.has_value()) {
-      std::printf("Use of undeclared Identifier '%s'", var->name.c_str());
       exit(1);
     }
 
     llvm::BasicBlock &tmpEntry = currentFunction->getEntryBlock();
     llvm::IRBuilder<> tmpBuilder(&tmpEntry, tmpEntry.begin());
     llvm::AllocaInst *ptr = symbol->alloca;
-    builder.CreateStore(gen_expression(expr->value.get()), ptr);
+    builder.CreateStore(gen_expression(expr->value.get()).value, ptr);
   }
 }
 
@@ -132,15 +178,16 @@ void Generator::gen_vardecl(VarDecl *v) {
   }
   ensure_linear_match(v->name);
   auto ty = resolve_type(v->type);
-  printf("Allocated Stack Space for Variable %s\n", v->name.c_str());
   if (ty == nullptr) {
-    printf("Fatal: Type Resolution: NULL\n");
   }
   llvm::BasicBlock &tmpEntry = currentFunction->getEntryBlock();
   llvm::IRBuilder<> tmpBuilder(&tmpEntry, tmpEntry.begin());
   llvm::AllocaInst *ptr = tmpBuilder.CreateAlloca(ty, nullptr, v->name.c_str());
-  builder.CreateStore(gen_expression(v->value.get()), ptr);
-  printf("'%s' Allocation Successful\n", v->name.c_str());
+  auto expr = gen_expression(v->value.get());
+  if (!type_match(v->type, expr.type)) {
+    throw_error("Type Mismatch at: " + v->name + " site", 3);
+  }
+  builder.CreateStore(expr.value, ptr);
   Variable var = Variable(v->name, v->type, ptr);
   this->current_context->add(var);
 }
@@ -149,12 +196,10 @@ llvm::Type *Generator::resolve_type(Type t) {
   switch (t.base) {
   case BaseType::I32: {
     auto v = llvm::Type::getInt32Ty(context);
-    printf("Resolved Type To 32bit Int\n");
     return v;
   } break;
   case BaseType::Str: {
     auto v = llvm::Type::getInt8Ty(context)->getPointerTo();
-    std::printf("Resolved Type To String\n");
     return v;
   } break;
   case BaseType::I8: {
@@ -176,7 +221,9 @@ void Generator::exit_scope() {
 }
 
 void Generator::throw_error(std::string msg, int code) {
-  std::cerr << "Tix Error: " << msg << "\n\t";
+  this->process->printer->mark_stage_done("LLVM Gen");
+  this->process->printer->finalize();
+  std::cerr << "\nTix Error: " << msg << "\n\t";
   std::cerr << "Process Terminated with code: " << code << "\n";
   exit(code);
 }
@@ -186,4 +233,17 @@ void Generator::ensure_linear_match(std::string __s) {
       throw_error(std::string("Redefinition of ") + __s, 1);
     }
   }
+}
+
+bool Generator::type_match(Type t1, Type t2) {
+  if (t1.is_integer()) {
+    return t2.is_integer();
+  }
+  if (t1.base == BaseType::Str) {
+    return t2.base == BaseType::Str;
+  }
+  if (t1.is_ptr) {
+    return (t2.is_ptr) && type_match(t1, t2);
+  }
+  return false;
 }

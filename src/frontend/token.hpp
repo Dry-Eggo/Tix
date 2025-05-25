@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../backend/systems/Diagnostics.hpp"
 #include <string>
 enum TokenKind {
   STRINGLIT,
@@ -15,6 +16,7 @@ enum TokenKind {
 struct Token {
   TokenKind kind;
   std::string data;
+  Span span;
   bool eq(Token t) { return t.data == data && t.kind == kind; }
 };
 
