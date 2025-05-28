@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/tixc.dir/src/ir/ir.c.o CMakeFiles/tixc.dir/src/ir/node_walker.c.o CMakeFiles/tixc.dir/src/lexer.c.o CMakeFiles/tixc.dir/src/node.c.o CMakeFiles/tixc.dir/src/parser.c.o CMakeFiles/tixc.dir/src/token_list.c.o CMakeFiles/tixc.dir/src/types.c.o CMakeFiles/tixc.dir/tix.c.o -o tixc

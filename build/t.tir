@@ -1,0 +1,5 @@
+
+function (i32) %foo:
+end
+function (i32) %main:
+end
