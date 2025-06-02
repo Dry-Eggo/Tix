@@ -47,10 +47,27 @@ Expr *create_intlit(int64_t i, Span span) {
   return ie;
 }
 
+Expr *create_strlit(const char *val, Span span) {
+  Expr *se = NEW(Expr);
+  se->kind = TEXPR_EXPRSTR;
+  se->span = span;
+  se->string_value = val;
+  return se;
+}
+
 Expr *create_ident(const char *name, Span span) {
   Expr *ident = NEW(Expr);
   ident->ident_name = strdup(name);
   ident->kind = TEXPR_EXPRIDENT;
   ident->span = span;
   return ident;
+}
+
+Expr *create_func_call(Expr *callee, list_Expr *args, Span span) {
+  Expr *func_call = NEW(Expr);
+  func_call->kind = TEXPR_FUNCCALL;
+  func_call->call.callee = callee;
+  func_call->call.args = args;
+  func_call->call.arg_count = args->count;
+  return func_call;
 }

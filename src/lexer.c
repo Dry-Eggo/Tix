@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "internals.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,6 +93,10 @@ static enum TokenKind token_iskeyword(const char *ident) {
     return TU32;
   } else if (strcmp(ident, "u64") == 0) {
     return TU64;
+  } else if (strcmp(ident, "void") == 0) {
+    return TVOID;
+  } else if (strcmp(ident, "extrn") == 0) {
+    return TEXTRN;
   }
   return TIDENT;
 }
@@ -187,6 +192,19 @@ Token tix_lexer_next_token(TLexer *lexer) {
     if (isdigit(lexer->current_char)) {
       return lexer_parse_number(lexer);
     }
+    if (lexer->current_char == '\"') {
+      lexer_advance(lexer);
+      char buf[255];
+      while (lexer->current_char != '\"') {
+        tstrcatf(buf, "%c", lexer->current_char);
+        lexer_advance(lexer);
+      }
+      TIX_LOG(stdout, INFO, "parsed string literal: %s", buf);
+      if (lexer->current_char == '\"')
+        lexer_advance(lexer);
+      return create_token(TSTR, lexer->line, start_col, lexer->col,
+                          strdup(buf));
+    }
     if (lexer->current_char == '{') {
       lexer_advance(lexer);
       return create_token(TOBRACE, lexer->line, start_col, lexer->col, NULL);
@@ -257,7 +275,12 @@ const char *token_tostr(enum TokenKind k) {
     break;
   case TDIV:
     name = "/";
-    break; default : name = "<unimplemented>";
+    break;
+  case TSEMI:
+    name = ";";
+    break;
+  default:
+    name = "<unimplemented>";
     break;
   }
   return strdup(name);

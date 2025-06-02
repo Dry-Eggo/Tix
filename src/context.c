@@ -12,10 +12,10 @@ bool NASM64_Context_rsearch(NASM64_Context *ctx, const char *symbol_name) {
   int max = ctx->symbols->count;
   for (int c = 0; c < max; c++) {
     if (strcmp(list_Symbol_get(ctx->symbols, c)->name, symbol_name) == 0) {
-      return false;
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 void NASM64_Context_add(NASM64_Context *ctx, Symbol *sym) {

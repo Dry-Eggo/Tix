@@ -23,8 +23,9 @@ typedef struct {
   NASM64_Context *global_context;
   NASM64_Context *current_context;
   list_NASM64_Function_Meta *functions;
+  int temp_counter;
 } NASM64_generator;
 
-void NASM64_init(NASM64_generator **, Program, char **, BuildOptions*);
+void NASM64_init(NASM64_generator **, Program, char **, BuildOptions *);
 void NASM64_generate(NASM64_generator *);
 void NASM64_deinit(NASM64_generator *);

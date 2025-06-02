@@ -1,5 +1,7 @@
 
+extrn fn tputs(msg: *u8) void;
+
 fn main() {
-	let foo : i32 = 1 + (4 + 5);
-	let bar: i32 = foo + 3;
+	let foo : *u8 = "Hello World";
+	tputs(foo);
 }

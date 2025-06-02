@@ -22,7 +22,3 @@ extern void tputs(const char *fmt) {
   }
 }
 
-void t_main() {
-  tputs("Hello World\n");
-  __tsys2(60, 5);
-}

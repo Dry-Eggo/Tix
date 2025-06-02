@@ -16,6 +16,7 @@ void parser_advance(TParser *p);
 int parser_init(TParser *parser, TokenList *tokens);
 void parser_parse(TParser *, Program *);
 Item *parser_function(TParser *);
+Item *parser_parse_extern(TParser*);
 void parser_parse_parameter(TParser *, Param **);
 Stmt *parser_parse_let(TParser *);
 Stmt *parser_block(TParser *);

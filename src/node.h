@@ -28,7 +28,7 @@ struct UnaryOp {
 };
 struct FCall {
   struct Expr *callee;
-  struct Expr **args;
+  struct list_Expr *args;
   size_t arg_count;
 };
 typedef struct Expr {
@@ -43,6 +43,7 @@ typedef struct Expr {
     struct FCall call;
   };
 } Expr;
+TIX_DYN_LIST(Expr, Expr)
 
 typedef enum {
   TSTMT_LET,
@@ -78,6 +79,7 @@ typedef enum {
   ITEM_TYPEDEF,
   ITEM_IMPORT,
   ITEM_GENLIST,
+  ITEM_EXTRN,
 } Itemkind;
 
 typedef struct Field {
@@ -107,11 +109,22 @@ struct StructStmt {
 struct Import {
   const char *path;
 };
+
+typedef enum  {
+  EXTERN_FN,
+} ExternKind;
+struct ExternStmt {
+  ExternKind kind;
+  union {
+    struct FnStmt fn;
+  } symbol;
+};
 typedef struct Item {
   Itemkind kind;
   Span span;
   union {
     struct FnStmt fn;
+    struct ExternStmt extrn;
     struct StructStmt stuct_stmt;
     struct Import import;
   };
@@ -140,6 +153,7 @@ int program_add(Program *, Node *);
 Expr *create_intlit(int64_t val, Span span);
 Expr *create_strlit(const char *val, Span span);
 Expr *create_ident(const char *name, Span span);
+Expr *create_func_call(Expr *callee, list_Expr *args, Span span);
 Node *create_nodei(Item *i);
 Node *create_nodes(Stmt *s);
 Node *create_nodee(Expr *e);

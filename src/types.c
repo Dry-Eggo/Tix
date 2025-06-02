@@ -1,5 +1,6 @@
 #include "types.h"
 
+#include <stdbool.h>
 #include <string.h>
 
 const char *Type_toraw(Type *t) {
@@ -12,9 +13,16 @@ const char *Type_toraw(Type *t) {
     return strdup("i32");
   case TTYPE_I64:
     return strdup("i64");
-    case TTYPE_VOID:
-      return strdup("void");
+  case TTYPE_VOID:
+    return strdup("void");
   }
+}
+
+bool Type_match(Type t1, Type t2) {
+  // basic match for now: implement cast-allowed later
+  if (t1.base != t2.base)
+    return false;
+  return true;
 }
 
 Type Type_create_i32() {
@@ -23,5 +31,13 @@ Type Type_create_i32() {
   t.is_mut = false;
   t.is_ptr = false;
   t.size_in_bytes = 4;
+  return t;
+}
+Type Type_create_void() {
+  Type t;
+  t.is_mut = true;
+  t.base = TTYPE_VOID;
+  t.is_ptr = false;
+  t.size_in_bytes = 0;
   return t;
 }

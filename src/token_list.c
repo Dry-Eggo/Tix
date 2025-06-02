@@ -23,6 +23,6 @@ const Token *token_list_get(TokenList *tl, int in) {
 }
 
 void token_list_grow(TokenList *tl) {
-  tl->tokens = realloc(tl->tokens, tl->cap * 2);
+  tl->tokens = realloc(tl->tokens, sizeof(Token) * (tl->cap * 2));
   tl->cap *= 2;
 }

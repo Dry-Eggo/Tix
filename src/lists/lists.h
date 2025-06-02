@@ -20,7 +20,7 @@
   }                                                                            \
   static inline int list_##name##_grow(list_##name *l) {                       \
     size_t ns = l->cap * 2;                                                    \
-    l->data = (T **)realloc(l->data, ns);                                      \
+    l->data = (T **)realloc(l->data, sizeof(T) * ns);                                      \
     l->cap = ns;                                                               \
     return 0;                                                                  \
   }                                                                            \

@@ -23,4 +23,4 @@ bool NASM64_Context_rsearch(NASM64_Context *, const char *symbol_name);
   @return : bool - true if found else false
 */
 bool NASM64_Context_search(NASM64_Context *, const char *symbol_name);
-void NASM64_Context_add(NASM64_Context*, Symbol* sym);
+void NASM64_Context_add(NASM64_Context *, Symbol *sym);

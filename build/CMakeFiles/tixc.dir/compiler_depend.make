@@ -213,6 +213,7 @@ CMakeFiles/tixc.dir/src/ir/node_walker.c.o: /home/dry/programming/c/tix/src/ir/n
   /usr/lib/gcc/x86_64-linux-gnu/14/include/stdint.h
 
 CMakeFiles/tixc.dir/src/lexer.c.o: /home/dry/programming/c/tix/src/lexer.c \
+  /home/dry/programming/c/tix/src/internals.h \
   /home/dry/programming/c/tix/src/lexer.h \
   /usr/include/alloca.h \
   /usr/include/ctype.h \
