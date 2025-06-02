@@ -5,5 +5,5 @@ build/
 toolchain/
 makefile
 rt/
-examples/
+# examples/
 *.txt
