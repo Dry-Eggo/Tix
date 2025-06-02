@@ -3,7 +3,20 @@
 
 #define TIX_MAX_STREAM_SIZE 4096
 #include <stdio.h>
+
 enum TokenKind {
+  TADD,
+  TSUB,
+  TMUL,
+  TDIV,
+  TI32,
+  TI8,
+  TI16,
+  TI64,
+  TU8,
+  TU16,
+  TU32,
+  TU64,
   TEOF,
   TNUMBER,
   TSTRING,
@@ -26,11 +39,14 @@ enum TokenKind {
   TSEMI,
   TCOL,
   TIDENT,
+  TLET,
+  TCOMMA,
 };
 
 typedef struct {
   int start;
   int end;
+  int line;
 } Span;
 
 typedef struct {

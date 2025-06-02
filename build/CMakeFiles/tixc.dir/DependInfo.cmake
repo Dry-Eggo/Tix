@@ -8,11 +8,14 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/dry/programming/c/tix/src/context.c" "CMakeFiles/tixc.dir/src/context.c.o" "gcc" "CMakeFiles/tixc.dir/src/context.c.o.d"
   "/home/dry/programming/c/tix/src/ir/ir.c" "CMakeFiles/tixc.dir/src/ir/ir.c.o" "gcc" "CMakeFiles/tixc.dir/src/ir/ir.c.o.d"
   "/home/dry/programming/c/tix/src/ir/node_walker.c" "CMakeFiles/tixc.dir/src/ir/node_walker.c.o" "gcc" "CMakeFiles/tixc.dir/src/ir/node_walker.c.o.d"
   "/home/dry/programming/c/tix/src/lexer.c" "CMakeFiles/tixc.dir/src/lexer.c.o" "gcc" "CMakeFiles/tixc.dir/src/lexer.c.o.d"
+  "/home/dry/programming/c/tix/src/nasm_generator.c" "CMakeFiles/tixc.dir/src/nasm_generator.c.o" "gcc" "CMakeFiles/tixc.dir/src/nasm_generator.c.o.d"
   "/home/dry/programming/c/tix/src/node.c" "CMakeFiles/tixc.dir/src/node.c.o" "gcc" "CMakeFiles/tixc.dir/src/node.c.o.d"
   "/home/dry/programming/c/tix/src/parser.c" "CMakeFiles/tixc.dir/src/parser.c.o" "gcc" "CMakeFiles/tixc.dir/src/parser.c.o.d"
+  "/home/dry/programming/c/tix/src/symbol.c" "CMakeFiles/tixc.dir/src/symbol.c.o" "gcc" "CMakeFiles/tixc.dir/src/symbol.c.o.d"
   "/home/dry/programming/c/tix/src/token_list.c" "CMakeFiles/tixc.dir/src/token_list.c.o" "gcc" "CMakeFiles/tixc.dir/src/token_list.c.o.d"
   "/home/dry/programming/c/tix/src/types.c" "CMakeFiles/tixc.dir/src/types.c.o" "gcc" "CMakeFiles/tixc.dir/src/types.c.o.d"
   "/home/dry/programming/c/tix/tix.c" "CMakeFiles/tixc.dir/tix.c.o" "gcc" "CMakeFiles/tixc.dir/tix.c.o.d"

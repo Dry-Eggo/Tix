@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = -I/home/dry/programming/c/tix/src
 
-C_FLAGS = 
+C_FLAGS = -g
 

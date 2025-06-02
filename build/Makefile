@@ -166,6 +166,30 @@ rt/runtime.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tix.dir/build.make CMakeFiles/tix.dir/rt/runtime.c.s
 .PHONY : rt/runtime.c.s
 
+src/context.o: src/context.c.o
+.PHONY : src/context.o
+
+# target to build an object file
+src/context.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/context.c.o
+.PHONY : src/context.c.o
+
+src/context.i: src/context.c.i
+.PHONY : src/context.i
+
+# target to preprocess a source file
+src/context.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/context.c.i
+.PHONY : src/context.c.i
+
+src/context.s: src/context.c.s
+.PHONY : src/context.s
+
+# target to generate assembly for a file
+src/context.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/context.c.s
+.PHONY : src/context.c.s
+
 src/ir/ir.o: src/ir/ir.c.o
 .PHONY : src/ir/ir.o
 
@@ -238,6 +262,30 @@ src/lexer.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/lexer.c.s
 .PHONY : src/lexer.c.s
 
+src/nasm_generator.o: src/nasm_generator.c.o
+.PHONY : src/nasm_generator.o
+
+# target to build an object file
+src/nasm_generator.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/nasm_generator.c.o
+.PHONY : src/nasm_generator.c.o
+
+src/nasm_generator.i: src/nasm_generator.c.i
+.PHONY : src/nasm_generator.i
+
+# target to preprocess a source file
+src/nasm_generator.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/nasm_generator.c.i
+.PHONY : src/nasm_generator.c.i
+
+src/nasm_generator.s: src/nasm_generator.c.s
+.PHONY : src/nasm_generator.s
+
+# target to generate assembly for a file
+src/nasm_generator.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/nasm_generator.c.s
+.PHONY : src/nasm_generator.c.s
+
 src/node.o: src/node.c.o
 .PHONY : src/node.o
 
@@ -285,6 +333,30 @@ src/parser.s: src/parser.c.s
 src/parser.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/parser.c.s
 .PHONY : src/parser.c.s
+
+src/symbol.o: src/symbol.c.o
+.PHONY : src/symbol.o
+
+# target to build an object file
+src/symbol.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/symbol.c.o
+.PHONY : src/symbol.c.o
+
+src/symbol.i: src/symbol.c.i
+.PHONY : src/symbol.i
+
+# target to preprocess a source file
+src/symbol.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/symbol.c.i
+.PHONY : src/symbol.c.i
+
+src/symbol.s: src/symbol.c.s
+.PHONY : src/symbol.s
+
+# target to generate assembly for a file
+src/symbol.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/src/symbol.c.s
+.PHONY : src/symbol.c.s
 
 src/token_list.o: src/token_list.c.o
 .PHONY : src/token_list.o
@@ -371,6 +443,9 @@ help:
 	@echo "... rt/runtime.o"
 	@echo "... rt/runtime.i"
 	@echo "... rt/runtime.s"
+	@echo "... src/context.o"
+	@echo "... src/context.i"
+	@echo "... src/context.s"
 	@echo "... src/ir/ir.o"
 	@echo "... src/ir/ir.i"
 	@echo "... src/ir/ir.s"
@@ -380,12 +455,18 @@ help:
 	@echo "... src/lexer.o"
 	@echo "... src/lexer.i"
 	@echo "... src/lexer.s"
+	@echo "... src/nasm_generator.o"
+	@echo "... src/nasm_generator.i"
+	@echo "... src/nasm_generator.s"
 	@echo "... src/node.o"
 	@echo "... src/node.i"
 	@echo "... src/node.s"
 	@echo "... src/parser.o"
 	@echo "... src/parser.i"
 	@echo "... src/parser.s"
+	@echo "... src/symbol.o"
+	@echo "... src/symbol.i"
+	@echo "... src/symbol.s"
 	@echo "... src/token_list.o"
 	@echo "... src/token_list.i"
 	@echo "... src/token_list.s"

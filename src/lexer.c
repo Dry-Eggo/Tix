@@ -59,6 +59,7 @@ static Token create_token(enum TokenKind t, int line, int cols, int cole,
   s.end = cole;
   tok.span = s;
   tok.line = line;
+  tok.span.line = line;
   return tok;
 }
 
@@ -73,21 +74,51 @@ static enum TokenKind token_iskeyword(const char *ident) {
     return TSTR;
   } else if (strcmp(ident, "return") == 0) {
     return TRETURN;
+  } else if (strcmp(ident, "let") == 0) {
+    return TLET;
+  } else if (strcmp(ident, "i32") == 0) {
+    return TI32;
+  } else if (strcmp(ident, "i8") == 0) {
+    return TI8;
+  } else if (strcmp(ident, "i16") == 0) {
+    return TI16;
+  } else if (strcmp(ident, "i64") == 0) {
+    return TI64;
+  } else if (strcmp(ident, "u8") == 0) {
+    return TU8;
+  } else if (strcmp(ident, "u16") == 0) {
+    return TU16;
+  } else if (strcmp(ident, "u32") == 0) {
+    return TU32;
+  } else if (strcmp(ident, "u64") == 0) {
+    return TU64;
   }
   return TIDENT;
 }
 
+static Token lexer_parse_number(TLexer *lexer) {
+  char buf[256];
+  int i = 0;
+  int start = lexer->col;
+  while (isdigit(lexer->current_char) && lexer->current_char != EOF) {
+    buf[i++] = lexer->current_char;
+    lexer_advance(lexer);
+  }
+  buf[i] = '\0';
+  enum TokenKind kind = TNUMBER;
+  return create_token(kind, lexer->line, start, lexer->col, buf);
+}
 static Token lexer_parse_kw_or_ident(TLexer *lexer) {
   char buf[256];
   int i = 0;
-  int start = lexer->pos;
+  int start = lexer->col;
   while (isalnum(lexer->current_char) && lexer->current_char != EOF) {
     buf[i++] = lexer->current_char;
     lexer_advance(lexer);
   }
   buf[i] = '\0';
   enum TokenKind kind = token_iskeyword(buf);
-  return create_token(kind, lexer->line, start, lexer->pos, buf);
+  return create_token(kind, lexer->line, start, lexer->col, buf);
 }
 
 int tix_lexer_init(TLexer *lexer, const char *filename) {
@@ -153,31 +184,55 @@ Token tix_lexer_next_token(TLexer *lexer) {
     if (isalpha(lexer->current_char) || lexer->current_char == '_') {
       return lexer_parse_kw_or_ident(lexer);
     }
+    if (isdigit(lexer->current_char)) {
+      return lexer_parse_number(lexer);
+    }
     if (lexer->current_char == '{') {
       lexer_advance(lexer);
-      return create_token(TOBRACE, lexer->line, start_col, lexer->pos, NULL);
+      return create_token(TOBRACE, lexer->line, start_col, lexer->col, NULL);
     }
     if (lexer->current_char == '}') {
       lexer_advance(lexer);
-      return create_token(TCBRACE, lexer->line, start_col, lexer->pos, NULL);
+      return create_token(TCBRACE, lexer->line, start_col, lexer->col, NULL);
     }
     switch (lexer->current_char) {
     case '=':
       lexer_advance(lexer);
-      return create_token(TEQ, lexer->line, start_col, lexer->pos, NULL);
+      return create_token(TEQ, lexer->line, start_col, lexer->col, NULL);
       break;
+    case '+':
+      lexer_advance(lexer);
+      return create_token(TADD, lexer->line, start_col, lexer->col, NULL);
+    case '-':
+      lexer_advance(lexer);
+      return create_token(TSUB, lexer->line, start_col, lexer->col, NULL);
+    case '*':
+      lexer_advance(lexer);
+      return create_token(TMUL, lexer->line, start_col, lexer->col, NULL);
+    case '/':
+      lexer_advance(lexer);
+      return create_token(TDIV, lexer->line, start_col, lexer->col, NULL);
     case '(':
       lexer_advance(lexer);
-      return create_token(TOPAREN, lexer->line, start_col, lexer->pos, NULL);
+      return create_token(TOPAREN, lexer->line, start_col, lexer->col, NULL);
       break;
     case ')':
       lexer_advance(lexer);
-      return create_token(TCPAREN, lexer->line, start_col, lexer->pos, NULL);
+      return create_token(TCPAREN, lexer->line, start_col, lexer->col, NULL);
+    case ':':
+      lexer_advance(lexer);
+      return create_token(TCOL, lexer->line, start_col, lexer->col, NULL);
+    case ';':
+      lexer_advance(lexer);
+      return create_token(TSEMI, lexer->line, start_col, lexer->col, NULL);
+    case ',':
+      lexer_advance(lexer);
+      return create_token(TCOMMA, lexer->line, start_col, lexer->col, NULL);
     default:
       break;
     }
   }
-  return create_token(TEOF, lexer->line, start_col, lexer->pos, NULL);
+  return create_token(TEOF, lexer->line, start_col, lexer->col, NULL);
 }
 const char *token_tostr(enum TokenKind k) {
   char *name;
@@ -191,8 +246,18 @@ const char *token_tostr(enum TokenKind k) {
   case TOBRACE:
     name = "{";
     break;
-  default:
-    name = "<unimplemented>";
+  case TADD:
+    name = "+";
+    break;
+  case TSUB:
+    name = "-";
+    break;
+  case TMUL:
+    name = "*";
+    break;
+  case TDIV:
+    name = "/";
+    break; default : name = "<unimplemented>";
     break;
   }
   return strdup(name);

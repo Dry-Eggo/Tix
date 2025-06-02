@@ -24,6 +24,7 @@ CMakeFiles/tixc.dir/src/node.c.o: /home/dry/programming/c/tix/src/node.c \
  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
  /usr/include/x86_64-linux-gnu/bits/floatn.h \
  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
+ /home/dry/programming/c/tix/src/lists/lists.h \
  /home/dry/programming/c/tix/src/types.h \
  /usr/lib/gcc/x86_64-linux-gnu/14/include/stdbool.h \
  /usr/lib/gcc/x86_64-linux-gnu/14/include/stdint.h /usr/include/stdint.h \
@@ -54,4 +55,8 @@ CMakeFiles/tixc.dir/src/node.c.o: /home/dry/programming/c/tix/src/node.c \
  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-float.h
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /home/dry/programming/c/tix/src/internals.h /usr/include/string.h \
+ /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
+ /usr/include/strings.h

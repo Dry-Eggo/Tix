@@ -27,11 +27,11 @@ Node *Node_next(Node_Walker *n) {
   return n->program->nodes[n->pos++];
 }
 void Node_parse_block(Stmt *stmt, TIR_Block **context) {
-  list_Stmt *blockstmt = stmt->stmt.statements;
-  int max = blockstmt->count;
+  typeof(stmt->block_stmt) blockstmt = stmt->block_stmt;
+  int max = blockstmt.statements->count;
   int inx = 0;
   while (inx < max) {
-    Stmt *stmt = list_Stmt_get(blockstmt, inx);
+    Stmt *stmt = list_Stmt_get(blockstmt.statements, inx);
     Node_parse_stmt(stmt, context);
     inx++;
   }
@@ -48,10 +48,10 @@ void Node_parse_stmt(Stmt *stmt, TIR_Block **context) {
 }
 
 void Node_parse_let_stmt(Stmt *stmt, TIR_Block **context) {
-  struct LetStmt *letstmt = &stmt->stmt.letstmt;
+  typeof(stmt->let_stmt) letstmt = stmt->let_stmt;
   TIR_Value *v;
-  Expr_result ty = Node_parse_expr(letstmt->init);
-  IR_Value(&v, letstmt->name, IR_Type_from_type(&ty.ty), ty.value, context);
+  Expr_result ty = Node_parse_expr(letstmt.init);
+  IR_Value(&v, letstmt.name, IR_Type_from_type(&ty.ty), ty.value, context);
   IR_Value_Store(&v, context);
 }
 
@@ -81,7 +81,7 @@ void Node_parse_fn(Item *item) {
     TIX_LOG(stderr, ERROR, "Main Module is null");
   }
   IR_Function(&fn, &m, function_name, context,
-              IR_Type_from_type(&item->fn.return_type));
+              IR_Type_from_type(item->fn.return_type));
 }
 void Node_add_inst(Node_Walker *n, TIR_Instruction *i) {
   IR_list_add(n->list, i);

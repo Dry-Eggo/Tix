@@ -1,4 +1,7 @@
 #include "node.h"
+#include "internals.h"
+#include "lexer.h"
+#include <stdint.h>
 #include <stdlib.h>
 
 int program_init(Program *p) {
@@ -26,4 +29,28 @@ Node *create_nodei(Item *i) {
   node->node.item = i;
   node->type = TNODE_ITEM;
   return node;
+}
+Expr *create_binop(enum TokenKind t, Expr *lhs, Expr *rhs) {
+  Expr *expr = malloc(sizeof(Expr));
+  expr->kind = TEXPR_BINEXPR;
+  expr->binary_op.lhs = lhs;
+  expr->binary_op.op = t;
+  expr->binary_op.rhs = rhs;
+  return expr;
+}
+
+Expr *create_intlit(int64_t i, Span span) {
+  Expr *ie = (Expr *)malloc(sizeof(Expr));
+  ie->kind = TEXPR_EXPRINT;
+  ie->span = span;
+  ie->int_value = i;
+  return ie;
+}
+
+Expr *create_ident(const char *name, Span span) {
+  Expr *ident = NEW(Expr);
+  ident->ident_name = strdup(name);
+  ident->kind = TEXPR_EXPRIDENT;
+  ident->span = span;
+  return ident;
 }

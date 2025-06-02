@@ -2,3 +2,8 @@
 *.out
 *.asm
 build/
+toolchain/
+makefile
+rt/
+examples/
+*.txt

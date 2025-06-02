@@ -3,17 +3,34 @@
 #define TIX_NODES
 
 #include "lexer.h"
+#include "lists/lists.h"
 #include "types.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 typedef enum {
   TEXPR_BINEXPR,
   TEXPR_EXPRINT,
+  TEXPR_EXPRIDENT,
   TEXPR_EXPRSTR,
   TEXPR_FUNCCALL,
   TEXPR_RETURN,
 } ExprKind;
 
+struct BinOp {
+  enum TokenKind op;
+  struct Expr *lhs;
+  struct Expr *rhs;
+};
+struct UnaryOp {
+  enum TokenKind op;
+  struct Expr *expr;
+};
+struct FCall {
+  struct Expr *callee;
+  struct Expr **args;
+  size_t arg_count;
+};
 typedef struct Expr {
   ExprKind kind;
   Span span;
@@ -21,21 +38,9 @@ typedef struct Expr {
     int64_t int_value;
     const char *string_value;
     const char *ident_name;
-
-    struct {
-      enum TokenKind op;
-      struct Expr *lhs;
-      struct Expr *rhs;
-    } binop;
-    struct {
-      enum TokenKind op;
-      struct Expr *expr;
-    } unop;
-    struct {
-      struct Expr *callee;
-      struct Expr **args;
-      size_t arg_count;
-    } call;
+    struct BinOp binary_op;
+    struct UnaryOp unop;
+    struct FCall call;
   };
 } Expr;
 
@@ -51,18 +56,22 @@ typedef enum {
   TSTMT_CONTINUE,
 } Stmtkind;
 
+struct LetStmt {
+  const char *name;
+  Type type;
+  struct Expr *init;
+};
 typedef struct Stmt {
   Stmtkind kind;
   Span span;
   union {
-    const char *name;
-    struct Expr *init;
-  } let_stmt;
-  union {
+    struct LetStmt letstmt;
     struct Expr *expr;
-  } expr_stmt;
+    struct list_Stmt *statements;
+  } stmt;
 } Stmt;
 
+TIX_DYN_LIST(Stmt, Stmt);
 typedef enum {
   ITEM_FN,
   ITEM_STRUCT,
@@ -79,29 +88,32 @@ typedef struct Field {
 
 typedef struct Param {
   const char *name;
-  Type *type;
+  Type type;
   struct Expr *init;
 } Param;
 
+TIX_DYN_LIST(Param, Param)
+struct FnStmt {
+  const char *name;
+  list_Param *param;
+  struct Type return_type;
+  struct Stmt *body;
+};
+struct StructStmt {
+  const char *name;
+  struct Field **field;
+  size_t field_count;
+};
+struct Import {
+  const char *path;
+};
 typedef struct Item {
   Itemkind kind;
   Span span;
   union {
-    struct {
-      const char *name;
-      struct Param **param;
-      size_t param_count;
-      struct Type *return_type;
-      struct Stmt *body;
-    } fn;
-    struct {
-      const char *name;
-      struct Field **field;
-      size_t field_count;
-    } struct_decl;
-    struct {
-      const char *path;
-    } import;
+    struct FnStmt fn;
+    struct StructStmt stuct_stmt;
+    struct Import import;
   };
 } Item;
 typedef enum { TNODE_EXPR, TNODE_STMT, TNODE_ITEM, TNODE_PROG } NodeKind;
@@ -127,8 +139,9 @@ int program_add(Program *, Node *);
 
 Expr *create_intlit(int64_t val, Span span);
 Expr *create_strlit(const char *val, Span span);
+Expr *create_ident(const char *name, Span span);
 Node *create_nodei(Item *i);
 Node *create_nodes(Stmt *s);
 Node *create_nodee(Expr *e);
-
+Expr *create_binop(enum TokenKind t, Expr *lhs, Expr *rhs);
 #endif

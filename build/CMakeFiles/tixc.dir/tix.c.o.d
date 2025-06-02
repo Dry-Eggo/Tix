@@ -1,6 +1,7 @@
 CMakeFiles/tixc.dir/tix.c.o: /home/dry/programming/c/tix/tix.c \
- /usr/include/stdc-predef.h /home/dry/programming/c/tix/src/ir/ir_gen.h \
- /usr/include/stdio.h \
+ /usr/include/stdc-predef.h \
+ /home/dry/programming/c/tix/src/build/build_opt.h \
+ /usr/lib/gcc/x86_64-linux-gnu/14/include/stdbool.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
@@ -23,30 +24,15 @@ CMakeFiles/tixc.dir/tix.c.o: /home/dry/programming/c/tix/tix.c \
  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
  /usr/include/x86_64-linux-gnu/bits/floatn.h \
- /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
- /home/dry/programming/c/tix/src/ir/../node.h \
- /home/dry/programming/c/tix/src/ir/../lexer.h \
- /home/dry/programming/c/tix/src/ir/../types.h \
- /usr/lib/gcc/x86_64-linux-gnu/14/include/stdbool.h \
- /usr/lib/gcc/x86_64-linux-gnu/14/include/stdint.h /usr/include/stdint.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /home/dry/programming/c/tix/src/lexer.h \
- /home/dry/programming/c/tix/src/node.h \
- /home/dry/programming/c/tix/src/parser.h \
- /home/dry/programming/c/tix/src/lexer.h \
- /home/dry/programming/c/tix/src/node.h \
- /home/dry/programming/c/tix/src/token_list.h \
- /home/dry/programming/c/tix/src/token_list.h /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn-common.h /usr/include/stdlib.h \
  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
  /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
  /usr/include/x86_64-linux-gnu/sys/types.h \
  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/timer_t.h /usr/include/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-intn.h /usr/include/endian.h \
  /usr/include/x86_64-linux-gnu/bits/endian.h \
  /usr/include/x86_64-linux-gnu/bits/endianness.h \
  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
@@ -63,4 +49,23 @@ CMakeFiles/tixc.dir/tix.c.o: /home/dry/programming/c/tix/tix.c \
  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/alloca.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-float.h
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h /usr/include/string.h \
+ /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
+ /usr/include/strings.h /home/dry/programming/c/tix/src/internals.h \
+ /home/dry/programming/c/tix/src/lexer.h \
+ /home/dry/programming/c/tix/src/lexer.h \
+ /home/dry/programming/c/tix/src/nasm_generator.h \
+ /home/dry/programming/c/tix/src/context.h \
+ /home/dry/programming/c/tix/src/symbol.h \
+ /home/dry/programming/c/tix/src/lists/lists.h \
+ /home/dry/programming/c/tix/src/types.h \
+ /home/dry/programming/c/tix/src/node.h \
+ /usr/lib/gcc/x86_64-linux-gnu/14/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+ /home/dry/programming/c/tix/src/node.h \
+ /home/dry/programming/c/tix/src/parser.h \
+ /home/dry/programming/c/tix/src/token_list.h \
+ /home/dry/programming/c/tix/src/token_list.h

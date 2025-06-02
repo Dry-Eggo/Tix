@@ -1,13 +1,14 @@
-#ifndef TIX_IR
-#define TIX_IR
+#pragma once
 
 #include <stdio.h>
 
 /*
  * Base for the Tix Textual Immediate Representation
  */
+#include "../lists/lists.h"
 #include "../node.h"
 #include <stdint.h>
+#include <stdlib.h>
 typedef enum {
   TIR_CALL,
   TIR_LOAD,
@@ -25,6 +26,7 @@ typedef enum {
 struct TIR_Instruction;
 
 typedef enum { TIR_I8, TIR_I16, TIR_I32, TIR_I64, TIR_PTR, TIR_STR } TIR_Type;
+TIR_Type IR_Type_from_type(Type *t);
 
 typedef struct {
   TIR_ExprKind kind;
@@ -49,8 +51,14 @@ typedef struct IR_list {
 } IR_list;
 
 typedef struct TIR_Value {
+  bool is_int;
+  bool is_str;
   const char *name;
   TIR_Type *type;
+  union {
+    int64_t int_value;
+    const char *str_value;
+  } val;
 } TIR_Value;
 typedef struct Node_Walker {
   IR_list *list;
@@ -65,23 +73,29 @@ typedef struct TIR_Function {
   TIR_Type type;
 } TIR_Function;
 
+TIX_DYN_LIST(TIR_Value, TIR_Value);
 typedef struct TIR_SymbolTable {
-  TIR_Value **symbol;
-  int max;
-  int index;
+  list_TIR_Value *symbol;
+  struct TIR_SymbolTable *parent;
 } TIR_SymbolTable;
+void IR_SymbolTable_init(TIR_SymbolTable **, TIR_SymbolTable *parent);
+TIR_Value *IR_SymbolTable_get(TIR_SymbolTable **, const char *name);
+bool IR_SymbolTable_store(TIR_SymbolTable **, TIR_Value *);
 
+TIX_DYN_LIST(TIR_Function, TIR_Function);
 typedef struct TIR_Module {
   const char *name;
   TIR_SymbolTable *globals;
-  struct TIR_Module *parent;
+  list_TIR_Function *functions;
 } TIR_Module;
-
+void IR_Module(TIR_Module **, const char *);
+void IR_Module_dump(TIR_Module **, FILE *stream);
+TIR_Module *IR_Get_mainmodule();
 typedef struct TIR_Block {
   const char *label;
   IR_list *inst;
   const char *exit_label;
-  TIR_Module *context;
+  TIR_SymbolTable *context;
 } TIR_Block;
 
 void Env_init();
@@ -91,12 +105,24 @@ void Node_init(Node_Walker *, Program *);
 void IR_list_init(IR_list *);
 void IR_list_add(IR_list *, TIR_Instruction *);
 void IR_load(TIR_Value *, TIR_Expr *);
-void TIR_Value_init(const char *name, TIR_Type type);
+void IR_Value(TIR_Value **, const char *name, TIR_Type type, TIR_Value *,
+              TIR_Block **);
+TIR_Value *IR_Value_Get_Constant_I32(int64_t val);
+void IR_Value_Store(TIR_Value **, TIR_Block **);
+const char *IR_Value_toraw(TIR_Value*);
 TIR_Type TIR_Type_get_i32();
 TIR_Type TIR_Type_get_constant_i32();
-void IR_Function(TIR_Function *, const char *name, TIR_Block *, TIR_Type type);
-void IR_Function_entry(TIR_Function *, TIR_Block *);
+const char *TIR_Type_tostr(TIR_Type);
+TIR_Type *IR_Type_dup(TIR_Type t);
+void IR_Function(TIR_Function **, TIR_Module **, const char *name, TIR_Block *,
+                 TIR_Type type);
+void IR_Function_entry(TIR_Function **, TIR_Block *);
+const char *IR_Function_tostr(TIR_Function *);
+void IR_Block(TIR_Block **, const char *, const char *);
 Node *Node_next(Node_Walker *);
 void Node_add_inst(Node_Walker *, TIR_Instruction *);
 void Node_generate(Node_Walker *);
-#endif
+void Node_set_source(char **source);
+void tlog(const char *, ...);
+void IR_EnterContext(TIR_SymbolTable *);
+void IR_ExitContext();

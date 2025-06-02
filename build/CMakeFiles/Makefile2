@@ -83,12 +83,12 @@ clean: CMakeFiles/tix.dir/clean
 CMakeFiles/tixc.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tixc.dir/build.make CMakeFiles/tixc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11 "Built target tixc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11,12,13,14 "Built target tixc"
 .PHONY : CMakeFiles/tixc.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/tixc.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dry/programming/c/tix/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dry/programming/c/tix/build/CMakeFiles 12
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/tixc.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/dry/programming/c/tix/build/CMakeFiles 0
 .PHONY : CMakeFiles/tixc.dir/rule

@@ -69,10 +69,24 @@ include CMakeFiles/tixc.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/tixc.dir/flags.make
 
+CMakeFiles/tixc.dir/src/context.c.o: CMakeFiles/tixc.dir/flags.make
+CMakeFiles/tixc.dir/src/context.c.o: /home/dry/programming/c/tix/src/context.c
+CMakeFiles/tixc.dir/src/context.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/tixc.dir/src/context.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/context.c.o -MF CMakeFiles/tixc.dir/src/context.c.o.d -o CMakeFiles/tixc.dir/src/context.c.o -c /home/dry/programming/c/tix/src/context.c
+
+CMakeFiles/tixc.dir/src/context.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/tixc.dir/src/context.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/dry/programming/c/tix/src/context.c > CMakeFiles/tixc.dir/src/context.c.i
+
+CMakeFiles/tixc.dir/src/context.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/tixc.dir/src/context.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/dry/programming/c/tix/src/context.c -o CMakeFiles/tixc.dir/src/context.c.s
+
 CMakeFiles/tixc.dir/src/ir/ir.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/src/ir/ir.c.o: /home/dry/programming/c/tix/src/ir/ir.c
 CMakeFiles/tixc.dir/src/ir/ir.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/tixc.dir/src/ir/ir.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/tixc.dir/src/ir/ir.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/ir/ir.c.o -MF CMakeFiles/tixc.dir/src/ir/ir.c.o.d -o CMakeFiles/tixc.dir/src/ir/ir.c.o -c /home/dry/programming/c/tix/src/ir/ir.c
 
 CMakeFiles/tixc.dir/src/ir/ir.c.i: cmake_force
@@ -86,7 +100,7 @@ CMakeFiles/tixc.dir/src/ir/ir.c.s: cmake_force
 CMakeFiles/tixc.dir/src/ir/node_walker.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/src/ir/node_walker.c.o: /home/dry/programming/c/tix/src/ir/node_walker.c
 CMakeFiles/tixc.dir/src/ir/node_walker.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/tixc.dir/src/ir/node_walker.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/tixc.dir/src/ir/node_walker.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/ir/node_walker.c.o -MF CMakeFiles/tixc.dir/src/ir/node_walker.c.o.d -o CMakeFiles/tixc.dir/src/ir/node_walker.c.o -c /home/dry/programming/c/tix/src/ir/node_walker.c
 
 CMakeFiles/tixc.dir/src/ir/node_walker.c.i: cmake_force
@@ -100,7 +114,7 @@ CMakeFiles/tixc.dir/src/ir/node_walker.c.s: cmake_force
 CMakeFiles/tixc.dir/src/lexer.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/src/lexer.c.o: /home/dry/programming/c/tix/src/lexer.c
 CMakeFiles/tixc.dir/src/lexer.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/tixc.dir/src/lexer.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/tixc.dir/src/lexer.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/lexer.c.o -MF CMakeFiles/tixc.dir/src/lexer.c.o.d -o CMakeFiles/tixc.dir/src/lexer.c.o -c /home/dry/programming/c/tix/src/lexer.c
 
 CMakeFiles/tixc.dir/src/lexer.c.i: cmake_force
@@ -111,10 +125,24 @@ CMakeFiles/tixc.dir/src/lexer.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/tixc.dir/src/lexer.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/dry/programming/c/tix/src/lexer.c -o CMakeFiles/tixc.dir/src/lexer.c.s
 
+CMakeFiles/tixc.dir/src/nasm_generator.c.o: CMakeFiles/tixc.dir/flags.make
+CMakeFiles/tixc.dir/src/nasm_generator.c.o: /home/dry/programming/c/tix/src/nasm_generator.c
+CMakeFiles/tixc.dir/src/nasm_generator.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/tixc.dir/src/nasm_generator.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/nasm_generator.c.o -MF CMakeFiles/tixc.dir/src/nasm_generator.c.o.d -o CMakeFiles/tixc.dir/src/nasm_generator.c.o -c /home/dry/programming/c/tix/src/nasm_generator.c
+
+CMakeFiles/tixc.dir/src/nasm_generator.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/tixc.dir/src/nasm_generator.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/dry/programming/c/tix/src/nasm_generator.c > CMakeFiles/tixc.dir/src/nasm_generator.c.i
+
+CMakeFiles/tixc.dir/src/nasm_generator.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/tixc.dir/src/nasm_generator.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/dry/programming/c/tix/src/nasm_generator.c -o CMakeFiles/tixc.dir/src/nasm_generator.c.s
+
 CMakeFiles/tixc.dir/src/node.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/src/node.c.o: /home/dry/programming/c/tix/src/node.c
 CMakeFiles/tixc.dir/src/node.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/tixc.dir/src/node.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/tixc.dir/src/node.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/node.c.o -MF CMakeFiles/tixc.dir/src/node.c.o.d -o CMakeFiles/tixc.dir/src/node.c.o -c /home/dry/programming/c/tix/src/node.c
 
 CMakeFiles/tixc.dir/src/node.c.i: cmake_force
@@ -128,7 +156,7 @@ CMakeFiles/tixc.dir/src/node.c.s: cmake_force
 CMakeFiles/tixc.dir/src/parser.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/src/parser.c.o: /home/dry/programming/c/tix/src/parser.c
 CMakeFiles/tixc.dir/src/parser.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/tixc.dir/src/parser.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/tixc.dir/src/parser.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/parser.c.o -MF CMakeFiles/tixc.dir/src/parser.c.o.d -o CMakeFiles/tixc.dir/src/parser.c.o -c /home/dry/programming/c/tix/src/parser.c
 
 CMakeFiles/tixc.dir/src/parser.c.i: cmake_force
@@ -139,10 +167,24 @@ CMakeFiles/tixc.dir/src/parser.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/tixc.dir/src/parser.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/dry/programming/c/tix/src/parser.c -o CMakeFiles/tixc.dir/src/parser.c.s
 
+CMakeFiles/tixc.dir/src/symbol.c.o: CMakeFiles/tixc.dir/flags.make
+CMakeFiles/tixc.dir/src/symbol.c.o: /home/dry/programming/c/tix/src/symbol.c
+CMakeFiles/tixc.dir/src/symbol.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/tixc.dir/src/symbol.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/symbol.c.o -MF CMakeFiles/tixc.dir/src/symbol.c.o.d -o CMakeFiles/tixc.dir/src/symbol.c.o -c /home/dry/programming/c/tix/src/symbol.c
+
+CMakeFiles/tixc.dir/src/symbol.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/tixc.dir/src/symbol.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/dry/programming/c/tix/src/symbol.c > CMakeFiles/tixc.dir/src/symbol.c.i
+
+CMakeFiles/tixc.dir/src/symbol.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/tixc.dir/src/symbol.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/dry/programming/c/tix/src/symbol.c -o CMakeFiles/tixc.dir/src/symbol.c.s
+
 CMakeFiles/tixc.dir/src/token_list.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/src/token_list.c.o: /home/dry/programming/c/tix/src/token_list.c
 CMakeFiles/tixc.dir/src/token_list.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/tixc.dir/src/token_list.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/tixc.dir/src/token_list.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/token_list.c.o -MF CMakeFiles/tixc.dir/src/token_list.c.o.d -o CMakeFiles/tixc.dir/src/token_list.c.o -c /home/dry/programming/c/tix/src/token_list.c
 
 CMakeFiles/tixc.dir/src/token_list.c.i: cmake_force
@@ -156,7 +198,7 @@ CMakeFiles/tixc.dir/src/token_list.c.s: cmake_force
 CMakeFiles/tixc.dir/src/types.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/src/types.c.o: /home/dry/programming/c/tix/src/types.c
 CMakeFiles/tixc.dir/src/types.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/tixc.dir/src/types.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/tixc.dir/src/types.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/src/types.c.o -MF CMakeFiles/tixc.dir/src/types.c.o.d -o CMakeFiles/tixc.dir/src/types.c.o -c /home/dry/programming/c/tix/src/types.c
 
 CMakeFiles/tixc.dir/src/types.c.i: cmake_force
@@ -170,7 +212,7 @@ CMakeFiles/tixc.dir/src/types.c.s: cmake_force
 CMakeFiles/tixc.dir/tix.c.o: CMakeFiles/tixc.dir/flags.make
 CMakeFiles/tixc.dir/tix.c.o: /home/dry/programming/c/tix/tix.c
 CMakeFiles/tixc.dir/tix.c.o: CMakeFiles/tixc.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/tixc.dir/tix.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/tixc.dir/tix.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/tixc.dir/tix.c.o -MF CMakeFiles/tixc.dir/tix.c.o.d -o CMakeFiles/tixc.dir/tix.c.o -c /home/dry/programming/c/tix/tix.c
 
 CMakeFiles/tixc.dir/tix.c.i: cmake_force
@@ -183,11 +225,14 @@ CMakeFiles/tixc.dir/tix.c.s: cmake_force
 
 # Object files for target tixc
 tixc_OBJECTS = \
+"CMakeFiles/tixc.dir/src/context.c.o" \
 "CMakeFiles/tixc.dir/src/ir/ir.c.o" \
 "CMakeFiles/tixc.dir/src/ir/node_walker.c.o" \
 "CMakeFiles/tixc.dir/src/lexer.c.o" \
+"CMakeFiles/tixc.dir/src/nasm_generator.c.o" \
 "CMakeFiles/tixc.dir/src/node.c.o" \
 "CMakeFiles/tixc.dir/src/parser.c.o" \
+"CMakeFiles/tixc.dir/src/symbol.c.o" \
 "CMakeFiles/tixc.dir/src/token_list.c.o" \
 "CMakeFiles/tixc.dir/src/types.c.o" \
 "CMakeFiles/tixc.dir/tix.c.o"
@@ -195,17 +240,20 @@ tixc_OBJECTS = \
 # External object files for target tixc
 tixc_EXTERNAL_OBJECTS =
 
+tixc: CMakeFiles/tixc.dir/src/context.c.o
 tixc: CMakeFiles/tixc.dir/src/ir/ir.c.o
 tixc: CMakeFiles/tixc.dir/src/ir/node_walker.c.o
 tixc: CMakeFiles/tixc.dir/src/lexer.c.o
+tixc: CMakeFiles/tixc.dir/src/nasm_generator.c.o
 tixc: CMakeFiles/tixc.dir/src/node.c.o
 tixc: CMakeFiles/tixc.dir/src/parser.c.o
+tixc: CMakeFiles/tixc.dir/src/symbol.c.o
 tixc: CMakeFiles/tixc.dir/src/token_list.c.o
 tixc: CMakeFiles/tixc.dir/src/types.c.o
 tixc: CMakeFiles/tixc.dir/tix.c.o
 tixc: CMakeFiles/tixc.dir/build.make
 tixc: CMakeFiles/tixc.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking C executable tixc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/dry/programming/c/tix/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking C executable tixc"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/tixc.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
