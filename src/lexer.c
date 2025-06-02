@@ -117,7 +117,8 @@ static Token lexer_parse_kw_or_ident(TLexer *lexer) {
   char buf[256];
   int i = 0;
   int start = lexer->col;
-  while (isalnum(lexer->current_char) && lexer->current_char != EOF) {
+  while ((isalnum(lexer->current_char) || lexer->current_char == '_') &&
+         lexer->current_char != EOF) {
     buf[i++] = lexer->current_char;
     lexer_advance(lexer);
   }
@@ -194,7 +195,7 @@ Token tix_lexer_next_token(TLexer *lexer) {
     }
     if (lexer->current_char == '\"') {
       lexer_advance(lexer);
-      char buf[255];
+      char buf[255] = {0};
       while (lexer->current_char != '\"') {
         tstrcatf(buf, "%c", lexer->current_char);
         lexer_advance(lexer);
@@ -204,6 +205,15 @@ Token tix_lexer_next_token(TLexer *lexer) {
         lexer_advance(lexer);
       return create_token(TSTR, lexer->line, start_col, lexer->col,
                           strdup(buf));
+      *buf = 0;
+    }
+    if (lexer->current_char == '\'') {
+      lexer_advance(lexer);
+      char c = lexer->current_char;
+      if (lexer_peek(lexer) != '\'') {
+        TIX_LOG(stderr, ERROR, "exxpected a singular byte");
+      }
+      lexer_advance(lexer);
     }
     if (lexer->current_char == '{') {
       lexer_advance(lexer);

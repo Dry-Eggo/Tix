@@ -1,7 +1,9 @@
 
 extrn fn tputs(msg: *u8) void;
+extrn fn tput_byte(ch: *u8) void;
 
 fn main() {
-	let foo : *u8 = "Hello World";
+	let foo : *u8 = "Hello World\n";
 	tputs(foo);
+	tput_byte('H');
 }

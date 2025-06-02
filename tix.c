@@ -17,11 +17,24 @@ static ARGDef commands[] = {
 extern void print_usage(const char *program) {
   fprintf(stdout, "USAGE:  %s [OPTIONS] <path-to-file>", program);
   fprintf(stdout, "\nOPTIONS:");
-  fprintf(stdout, "\n    --help              print this message");
-  fprintf(stdout, "\n    --out               set output path");
-  fprintf(stdout, "\n    --ver               display version");
   fprintf(stdout,
-          "\n    --target            set target output: see --help target");
+          "\n    --help        | -h                 print this message");
+  fprintf(stdout, "\n    --output      | -o                 set output path");
+  fprintf(stdout, "\n    --version     | -v                 display version");
+  fprintf(stdout,
+          "\n    --target      | -t                 set target output: see "
+          "--help target");
+  fprintf(stdout, "\n    --build       |                    build a project "
+                  "that was initialized by the compiler");
+  fprintf(stdout, "\n    --init        |                    initialize a "
+                  "project in \033[33mcurrent directory\033[0m");
+  fprintf(stdout,
+          "\n    --run         |                    run an executable built by "
+          "the compiler for a project initialized by the compiler");
+  fprintf(stdout, "\n    --build-run   |                    runs --build and --run");
+  fprintf(stdout,
+          "\n    --clean       |                    clean artifacts made by "
+          "the compiler's build system");
   fprintf(stdout, "\n");
 }
 
@@ -37,6 +50,7 @@ int main(int argc, char **argv) {
   }
   if (bld.show_version) {
     printf("version: %s\n", version);
+    exit(1);
   }
   TLexer lexer;
   if (tix_lexer_init(&lexer, bld.inputfile) == 0) {

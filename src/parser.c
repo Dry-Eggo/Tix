@@ -77,12 +77,14 @@ Type parser_parse_type(TParser *p) {
     Type ty = Type_create_i32(); // TODO: Dont be lazy man.
     ty.base = TTYPE_U8;          // really n**ga
     parser_advance(p);
+    ty.size_in_bytes = 1;
     return ty;
   }
   case TMUL: {
     parser_advance(p);
     Type inner = parser_parse_type(p);
     inner.is_ptr = true;
+    inner.size_in_bytes = 8;
     TIX_LOG(stdout, INFO, "Parsed pointer type");
     return inner;
   }

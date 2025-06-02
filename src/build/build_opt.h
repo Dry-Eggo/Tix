@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define FLAG(arg, long, short)                                                 \
+  (strcmp(arg, long) == 0 || strcmp(arg, short) == 0)
 typedef struct {
   const char *help;
 } ARGDef;
@@ -44,7 +46,7 @@ static void parse_arguments(BuildOptions *b, int c, char **v) {
   b->has_specialized_help_target = false;
   while (i < c) {
     const char *arg = shift(&i, v);
-    if (strcmp(arg, "--help") == 0) {
+    if (FLAG(arg, "--help", "-h")) {
       if (i < c) {
         b->help_target = get_help_index(shift(&i, v));
         b->has_specialized_help_target = true;
@@ -54,9 +56,10 @@ static void parse_arguments(BuildOptions *b, int c, char **v) {
         b->show_help = true;
         return;
       }
-    } else if (strcmp(arg, "--ver") == 0) {
+    } else if (FLAG(arg, "--version", "-v")) {
       b->show_version = true;
-    } else if (strcmp(arg, "--out") == 0) {
+      return;
+    } else if (FLAG(arg, "--output", "-o")) {
       if (c <= 0) {
         print_usage(v[0]);
         fprintf(stderr, "\n--out expected an argument");

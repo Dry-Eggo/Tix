@@ -105,7 +105,30 @@ int NASM64_align(int offset, int size, int align) {
 int NASM64_get_next_offset(NASM64_generator *gen) {
   return gen->current_offset;
 }
-
+// Escapes raw strings from source code i.e turning '\n' to actual newlines
+const char *NASM64_string_escape(const char *str) {
+  // TODO: add support for all escape sequences
+  char buf[1024] = {0};
+  int i = 0;
+  int b = 1;
+  buf[0] = '\'';
+  while (str[i]) {
+    if (str[i] == '\\' && str[i + 1] == 'n') {
+      strcat(buf, "', 10");
+      i += 2;
+      b += 5;
+      if (str[i]) {
+        strcat(buf, ", '");
+        b += 3;
+      }
+    }
+    buf[b] = str[i];
+    ++i;
+    ++b;
+  }
+  buf[b] = '\'';
+  return strdup(buf);
+}
 const char *NASM64_get_registerv(int *i) { return sysv_regs[(*i)++]; }
 // Aligns the next offset to 4 bytes
 // status: Unimplemented
@@ -233,10 +256,10 @@ NASM64_ExprResult *NASM64_generate_expr(NASM64_generator *gen,
   } break;
   case TEXPR_EXPRSTR: {
     NASM64_ExprResult *res = new_expr_result();
-    tstrcatf(data, "\ngbval%d: db '%s', 0", gen->temp_counter,
-             expr->string_value);
-    tstrcatf(res->preamble, "\n    lea rbx, gbval%d", gen->temp_counter++);
-    sprintf(res->result, "rbx");
+    tstrcatf(data, "\ngbval%d: db %s, 0", gen->temp_counter,
+             NASM64_string_escape(expr->string_value));
+    tstrcatf(res->preamble, "\n    lea rdi, gbval%d", gen->temp_counter++);
+    sprintf(res->result, "rdi");
     res->is_initialized_expr = true;
     res->ty = Type_create_i32();
     res->ty.base = TTYPE_U8;
@@ -250,8 +273,7 @@ NASM64_ExprResult *NASM64_generate_expr(NASM64_generator *gen,
     for (int i = 0; i < max; ++i) {
       Symbol *sym = list_Symbol_get(gen->current_context->symbols, i);
       if (strcmp(sym->name, name) == 0) {
-        sprintf(res->preamble, "\n    mov rbx, [rbp - %d]", sym->offset);
-        sprintf(res->result, "rbx");
+        sprintf(res->result, "[rbp - %d]", sym->offset);
         res->is_initialized_expr = sym->is_init ? true : false;
         res->ty = sym->type;
         return res;
@@ -318,8 +340,8 @@ void NASM64_generate_let(NASM64_generator *gen, struct LetStmt *letstmt,
               "Cannot initialize a value with an uninitialized value");
       exit(1);
     }
-    // MovOpcode mov = MovOpcode_get_movopcode(letstmt->type, false, res.ty);
-    MovOpcode mov = MOVQ;
+    MovOpcode mov = MovOpcode_get_movopcode(letstmt->type, false, res->ty);
+    // MovOpcode mov = MOVQ;
     if (res->preamble) {
       tstrcatf(stream, "\n%s", res->preamble);
     }
