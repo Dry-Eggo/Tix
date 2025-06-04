@@ -283,6 +283,7 @@ CMakeFiles/tixc.dir/src/nasm_generator.c.o: /home/dry/programming/c/tix/src/nasm
   /home/dry/programming/c/tix/src/lists/lists.h \
   /home/dry/programming/c/tix/src/nasm_generator.h \
   /home/dry/programming/c/tix/src/node.h \
+  /home/dry/programming/c/tix/src/string_builder.h \
   /home/dry/programming/c/tix/src/symbol.h \
   /home/dry/programming/c/tix/src/types.h \
   /usr/include/alloca.h \
@@ -427,6 +428,7 @@ CMakeFiles/tixc.dir/src/parser.c.o: /home/dry/programming/c/tix/src/parser.c \
   /home/dry/programming/c/tix/src/lists/lists.h \
   /home/dry/programming/c/tix/src/node.h \
   /home/dry/programming/c/tix/src/parser.h \
+  /home/dry/programming/c/tix/src/string_builder.h \
   /home/dry/programming/c/tix/src/token_list.h \
   /home/dry/programming/c/tix/src/types.h \
   /usr/include/alloca.h \
@@ -722,6 +724,8 @@ CMakeFiles/tixc.dir/tix.c.o: /home/dry/programming/c/tix/tix.c \
 /home/dry/programming/c/tix/src/token_list.h:
 
 /home/dry/programming/c/tix/src/node.c:
+
+/home/dry/programming/c/tix/src/string_builder.h:
 
 /home/dry/programming/c/tix/src/parser.h:
 

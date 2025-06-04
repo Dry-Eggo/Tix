@@ -46,7 +46,7 @@ static inline void _tix_log(FILE *stream, const char *label, const char *fmt,
   fprintf(stderr, "   │\n");
   fprintf(stderr, "  %d│ %s\n", loc.line, line);
   fprintf(stderr, "   │");
-  for (int i = 0; i < line_len; ++i) {
+  for (int i = 0; i <= line_len; ++i) {
     if (i == loc.start + 1) {
       fprintf(stderr, "\033[33m^");
       while (i < loc.end) {

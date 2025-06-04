@@ -62,4 +62,4 @@ CMakeFiles/tixc.dir/src/parser.c.o: \
  /home/dry/programming/c/tix/src/internals.h /usr/include/string.h \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
- /usr/include/strings.h
+ /usr/include/strings.h /home/dry/programming/c/tix/src/string_builder.h

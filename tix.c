@@ -31,7 +31,8 @@ extern void print_usage(const char *program) {
   fprintf(stdout,
           "\n    --run         |                    run an executable built by "
           "the compiler for a project initialized by the compiler");
-  fprintf(stdout, "\n    --build-run   |                    runs --build and --run");
+  fprintf(stdout,
+          "\n    --build-run   |                    runs --build and --run");
   fprintf(stdout,
           "\n    --clean       |                    clean artifacts made by "
           "the compiler's build system");
@@ -75,5 +76,6 @@ int main(int argc, char **argv) {
   NASM64_init(&gen, pr, p.source, &bld);
   NASM64_generate(gen);
   NASM64_deinit(gen);
+  TIX_LOG(stdout, Finished, "Output: '%s'", bld.outputfile);
   return EXIT_SUCCESS;
 }

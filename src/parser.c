@@ -2,6 +2,7 @@
 #include "internals.h"
 #include "lexer.h"
 #include "node.h"
+#include "string_builder.h"
 #include "token_list.h"
 #include "types.h"
 #include <stdio.h>
@@ -10,6 +11,7 @@
 
 #define PNOW(p) token_list_get(p->tokens, p->pos)
 #define PNOWT(p) parser_peek(p)->kind
+#define PNOWB(p) token_list_get(p->tokens, p->pos - 1)
 #define EQ(t1, t2) (t1 == t2)
 
 int parser_init(TParser *parser, TokenList *tokens) {
@@ -93,7 +95,7 @@ Type parser_parse_type(TParser *p) {
     return Type_create_void();
   }
   default:
-    tix_error(PNOW(p)->span, "Unexpected type", p->source, NULL);
+    tix_error(PNOWB(p)->span, "Unexpected type", p->source, NULL);
     exit(1); /* shouldn't reach here */
   }
 }
@@ -192,6 +194,13 @@ Expr *parser_parse_atom(TParser *p) {
     parser_expect(p, TCPAREN);
     return inner;
   } break;
+  case TSUB: {
+    enum TokenKind op = PNOWT(p);
+    parser_advance(p);
+    Expr *expr = parser_parse_expr(p);
+    Expr *unop = create_unop(op, expr, expr->span);
+    return unop;
+  } break;
   default:
     tix_error(PNOW(p)->span, "Invalid Expr", p->source, NULL);
   }
@@ -216,6 +225,7 @@ Item *parser_parse_extern(TParser *p) {
 }
 Item *parser_function(TParser *p) {
   Item *func_stmt = (Item *)malloc(sizeof(Item));
+  Span span = PNOW(p)->span;
   parser_advance(p); // skip 'fn' keyword
   char *name = malloc(64);
   name = strdup(parser_expect_ident(p));
@@ -253,6 +263,7 @@ Item *parser_function(TParser *p) {
     parser_expect(p, TCBRACE);
   }
   func_stmt->kind = ITEM_FN;
+  func_stmt->span = span;
   return func_stmt;
 }
 void parser_parse_parameter(TParser *p, Param **param) {
@@ -276,8 +287,7 @@ const char *parser_expect_ident(TParser *p) {
     parser_advance(p);
     return strdup(t->data);
   }
-  fprintf(stderr, "Expected an identifier, got '%s' instead\n",
-          token_tostr(PNOWT(p)));
+  tix_error(PNOWB(p)->span, "Expected an identifier", p->source, NULL);
   exit(1);
 }
 void parser_expect(TParser *p, enum TokenKind k) {
@@ -285,8 +295,10 @@ void parser_expect(TParser *p, enum TokenKind k) {
     parser_advance(p);
     return;
   }
-  fprintf(stderr, "Expected '%s' got '%s' instead'\n", token_tostr(k),
-          token_tostr(PNOWT(p)));
+  StringBuilder *sb;
+  SB_init(&sb);
+  sbapp(sb, "Expected '%s'", token_tostr(k));
+  tix_error(PNOW(p)->span, sb->data, p->source, NULL);
   exit(1);
   return;
 }

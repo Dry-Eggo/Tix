@@ -64,4 +64,5 @@ CMakeFiles/tixc.dir/src/nasm_generator.c.o: \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /home/dry/programming/c/tix/src/internals.h
+ /home/dry/programming/c/tix/src/internals.h \
+ /home/dry/programming/c/tix/src/string_builder.h

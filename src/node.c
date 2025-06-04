@@ -39,6 +39,15 @@ Expr *create_binop(enum TokenKind t, Expr *lhs, Expr *rhs) {
   return expr;
 }
 
+Expr *create_unop(enum TokenKind op, Expr *expr, Span span) {
+  Expr *unop = NEW(Expr);
+  unop->kind = TEXPR_UNOPEXPR;
+  unop->unop.op = op;
+  unop->unop.expr = expr;
+  unop->span = span;
+  return unop;
+}
+
 Expr *create_intlit(int64_t i, Span span) {
   Expr *ie = (Expr *)malloc(sizeof(Expr));
   ie->kind = TEXPR_EXPRINT;

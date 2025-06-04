@@ -10,6 +10,7 @@
 #include <stdlib.h>
 typedef enum {
   TEXPR_BINEXPR,
+  TEXPR_UNOPEXPR,
   TEXPR_EXPRINT,
   TEXPR_EXPRIDENT,
   TEXPR_EXPRSTR,
@@ -110,7 +111,7 @@ struct Import {
   const char *path;
 };
 
-typedef enum  {
+typedef enum {
   EXTERN_FN,
 } ExternKind;
 struct ExternStmt {
@@ -158,4 +159,5 @@ Node *create_nodei(Item *i);
 Node *create_nodes(Stmt *s);
 Node *create_nodee(Expr *e);
 Expr *create_binop(enum TokenKind t, Expr *lhs, Expr *rhs);
+Expr *create_unop(enum TokenKind op, Expr *expr, Span span);
 #endif

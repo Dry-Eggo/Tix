@@ -18,6 +18,7 @@ typedef struct Type {
   bool is_ptr;
   bool is_mut;
   int size_in_bytes;
+  bool is_signed;
 } Type;
 
 const char *Type_toraw(Type *);

@@ -1,9 +1,8 @@
 
 extrn fn tputs(msg: *u8) void;
-extrn fn tput_byte(ch: *u8) void;
+extrn fn tput_i(n:i32) void;
 
 fn main() {
-	let foo : *u8 = "Hello World\n";
-	tputs(foo);
-	tput_byte('H');
+	let bar : i32 = -60;
+	tput_i(bar);
 }
