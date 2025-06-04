@@ -1,4 +1,0 @@
-
-func extern (void) %_start:
-	sysexit (i32) 3
-end

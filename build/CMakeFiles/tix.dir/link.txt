@@ -1,2 +1,0 @@
-/usr/bin/ar qc libtix.a CMakeFiles/tix.dir/rt/runtime.c.o
-/usr/bin/ranlib libtix.a

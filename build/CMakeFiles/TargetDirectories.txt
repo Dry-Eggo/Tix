@@ -1,4 +1,0 @@
-/home/dry/programming/c/tix/build/CMakeFiles/tixc.dir
-/home/dry/programming/c/tix/build/CMakeFiles/tix.dir
-/home/dry/programming/c/tix/build/CMakeFiles/edit_cache.dir
-/home/dry/programming/c/tix/build/CMakeFiles/rebuild_cache.dir

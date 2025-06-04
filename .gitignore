@@ -1,9 +1,9 @@
 *.o
 *.out
-# *.asm
-# build/
+*.asm
+build/
 toolchain/
 makefile
-# rt/
-# examples/
+rt/
+examples/
 *.txt
