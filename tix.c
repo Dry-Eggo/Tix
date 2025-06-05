@@ -4,6 +4,7 @@
 #include "src/nasm_generator.h"
 #include "src/node.h"
 #include "src/parser.h"
+#include "src/string_builder.h"
 #include "src/token_list.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,12 +37,18 @@ extern void print_usage(const char *program) {
   fprintf(stdout,
           "\n    --clean       |                    clean artifacts made by "
           "the compiler's build system");
+  fprintf(stdout,
+          "\n    -c            |                    Compile to object file");
+  fprintf(stdout,
+          "\n    -s            |                    Compile to assembly");
   fprintf(stdout, "\n");
 }
-
+bool TIX_DEBUG_ENABLED;
 int main(int argc, char **argv) {
+  TIX_DEBUG_ENABLED = false;
   BuildOptions bld = {.show_help = false, .show_version = false};
   parse_arguments(&bld, argc, argv);
+  TIX_DEBUG_ENABLED = bld.verbose;
   if (bld.show_help && !bld.help_target) {
     print_usage(argv[0]);
     exit(1);
@@ -54,15 +61,15 @@ int main(int argc, char **argv) {
     exit(1);
   }
   TLexer lexer;
-  if (tix_lexer_init(&lexer, bld.inputfile) == 0) {
+  if (tix_lexer_init(&lexer, bld.inputfile) != 0) {
     return EXIT_FAILURE;
   }
   Token token;
-  TokenList tokens;
+  TokenList tokens = {0};
   token_list_init(&tokens);
   do {
     token = tix_lexer_next_token(&lexer);
-    // tix_token_print(&token);
+    print_token(token);
     token_list_add(&tokens, token);
   } while (token.kind != TEOF);
   TParser p;
@@ -76,6 +83,58 @@ int main(int argc, char **argv) {
   NASM64_init(&gen, pr, p.source, &bld);
   NASM64_generate(gen);
   NASM64_deinit(gen);
-  TIX_LOG(stdout, Finished, "Output: '%s'", bld.outputfile);
-  return EXIT_SUCCESS;
+  // TODO: tidy this mess
+  extern StringBuilder *nasm_out;
+  switch (bld.stage) {
+  case ASM: {
+    char path[128] = {0};
+    sprintf(path, "%s.s", bld.outputfile);
+    FILE *s = fopen(path, "w");
+    fprintf(s, "%s", nasm_out->data);
+    fclose(s);
+    TIX_LOG(stdout, Finished, "Output: '%s.s'", bld.outputfile);
+    return EXIT_SUCCESS;
+  }
+  case OBJ: {
+    char path[128] = {0};
+    sprintf(path, "%s.s", bld.outputfile);
+    FILE *s = fopen(path, "w");
+    fprintf(s, "%s", nasm_out->data);
+    fclose(s);
+    StringBuilder *cmd;
+    SB_init(&cmd);
+    SB_set(cmd, "nasm -felf64 -g -dwarf %s.s -o %s.o", bld.outputfile,
+           bld.outputfile);
+    system(cmd->data);
+    SB_set(cmd, "rm %s.s", bld.outputfile, bld.outputfile);
+    system(cmd->data);
+    TIX_LOG(stdout, Finished, "Output: '%s.o'", bld.outputfile);
+    return EXIT_SUCCESS;
+  }
+  case EXE: {
+    char path[128] = {0};
+    sprintf(path, "%s.s", bld.outputfile);
+    FILE *s = fopen(path, "w");
+    fprintf(s, "%s", nasm_out->data);
+    fclose(s);
+    StringBuilder *cmd;
+    SB_init(&cmd);
+    SB_set(cmd, "nasm -felf64 -g -dwarf %s.s -o %s.o", bld.outputfile,
+           bld.outputfile);
+    int status = system(cmd->data);
+    if (WIFEXITED(status)) {
+      int code = WEXITSTATUS(status);
+      if (code != 0) {
+      TIX_LOG(stderr, ERROR, "Fatal Error during compilation");
+      exit(1);
+      }
+    }
+    SB_set(cmd, "ld %s.o libtix.a -o %s", bld.outputfile, bld.outputfile);
+    system(cmd->data);
+    SB_set(cmd, "rm %s.s %s.o", bld.outputfile, bld.outputfile);
+    system(cmd->data);
+    TIX_LOG(stdout, Finished, "Output: '%s'", bld.outputfile);
+    return EXIT_SUCCESS;
+  }
+  }
 }

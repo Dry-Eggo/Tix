@@ -48,6 +48,22 @@ Expr *create_unop(enum TokenKind op, Expr *expr, Span span) {
   return unop;
 }
 
+Expr *create_preinc(enum TokenKind op, Expr *expr, Span span) {
+  Expr *preinc = NEW(Expr);
+  preinc->kind = TEXPR_PREINCEXPR;
+  preinc->unop.op = op;
+  preinc->unop.expr = expr;
+  preinc->span = span;
+  return preinc;
+}
+Expr *create_postinc(enum TokenKind op, Expr *expr, Span span) {
+  Expr *postinc = NEW(Expr);
+  postinc->kind = TEXPR_POSTINCEXPR;
+  postinc->unop.op = op;
+  postinc->unop.expr = expr;
+  postinc->span = span;
+  return postinc;
+}
 Expr *create_intlit(int64_t i, Span span) {
   Expr *ie = (Expr *)malloc(sizeof(Expr));
   ie->kind = TEXPR_EXPRINT;

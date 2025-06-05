@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 int token_list_init(TokenList *tl) {
+  
   tl->tokens = malloc(64 * sizeof(Token));
   tl->cap = 64;
   tl->count = 0;

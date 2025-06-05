@@ -43,13 +43,13 @@ static inline void _tix_log(FILE *stream, const char *label, const char *fmt,
   }
   strncpy(slice, line + loc.start, len);
   slice[len] = '\0';
-  fprintf(stderr, "   │\n");
-  fprintf(stderr, "  %d│ %s\n", loc.line, line);
-  fprintf(stderr, "   │");
-  for (int i = 0; i <= line_len; ++i) {
-    if (i == loc.start + 1) {
+  fprintf(stderr, "  │\n");
+  fprintf(stderr, "%d │%s\n", loc.line, line);
+  fprintf(stderr, "  │");
+  for (int i = 0; i < line_len; ++i) {
+    if (i == loc.start) {
       fprintf(stderr, "\033[33m^");
-      while (i < loc.end) {
+      while (i < loc.end - 1) {
         fprintf(stderr, "^");
         i++;
       }

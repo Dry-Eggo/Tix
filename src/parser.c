@@ -87,7 +87,6 @@ Type parser_parse_type(TParser *p) {
     Type inner = parser_parse_type(p);
     inner.is_ptr = true;
     inner.size_in_bytes = 8;
-    TIX_LOG(stdout, INFO, "Parsed pointer type");
     return inner;
   }
   case TVOID: {
@@ -95,7 +94,7 @@ Type parser_parse_type(TParser *p) {
     return Type_create_void();
   }
   default:
-    tix_error(PNOWB(p)->span, "Unexpected type", p->source, NULL);
+    tix_error(PNOW(p)->span, "Unexpected type", p->source, NULL);
     exit(1); /* shouldn't reach here */
   }
 }
@@ -111,6 +110,7 @@ Stmt *parser_parse_block(TParser *p) {
       continue;
     default: {
       Stmt *exprStmt = NEW(Stmt);
+      exprStmt->span = PNOW(p)->span;
       exprStmt->stmt.expr = parser_parse_expr(p);
       exprStmt->kind = TSTMT_EXPR;
       list_Stmt_add(blockStmt->stmt.statements, exprStmt);
@@ -134,7 +134,7 @@ Expr *parser_parse_expr(TParser *p) {
 
 Expr *parser_parse_term(TParser *p) {
   Expr *lhs = parser_parse_atom(p);
-  while (PNOWT(p) == (TMUL | TDIV)) {
+  while (PNOWT(p) == TMUL || PNOWT(p) == TDIV) {
     enum TokenKind op = PNOWT(p);
     parser_advance(p);
     Expr *rhs = parser_parse_atom(p);
@@ -149,11 +149,11 @@ Expr *parser_parse_atom(TParser *p) {
     char *endptr = NULL;
     Expr *num =
         create_intlit(strtoll(PNOW(p)->data, &endptr, 10), PNOW(p)->span);
-    parser_advance(p);
     if (*endptr != '\0') {
-      tix_error(PNOW(p)->span, "Non-Numeric Characters in integer", p->source,
+      tix_error(PNOWB(p)->span, "Non-Numeric Characters in integer", p->source,
                 NULL);
     }
+    parser_advance(p);
     return num;
   }
   case TSTR: {
@@ -164,7 +164,7 @@ Expr *parser_parse_atom(TParser *p) {
   case TIDENT: {
     int start = PNOW(p)->span.start;
     int line = PNOW(p)->span.line;
-    char *name = PNOW(p)->data;
+    const char *name = PNOW(p)->data;
     Expr *ident = create_ident(name, PNOW(p)->span);
     parser_advance(p);
     if (EQ(PNOWT(p), TOPAREN)) {
@@ -185,6 +185,13 @@ Expr *parser_parse_atom(TParser *p) {
       Expr *fccall = create_func_call(
           ident, args, (Span){.start = start, .end = end, .line = line});
       return fccall;
+    } else if (PNOWT(p) == TADDADD || PNOWT(p) == TSUBSUB) {
+      enum TokenKind op = PNOWT(p);
+      parser_advance(p);
+      int end = PNOW(p)->span.end;
+      Expr *postinc = create_postinc(
+          op, ident, (Span){.start = start, .end = end, .line = line});
+      return postinc;
     }
     return ident;
   } break;
@@ -200,6 +207,21 @@ Expr *parser_parse_atom(TParser *p) {
     Expr *expr = parser_parse_expr(p);
     Expr *unop = create_unop(op, expr, expr->span);
     return unop;
+  } break;
+  case TADDADD:
+  case TSUBSUB: {
+    enum TokenKind op = PNOWT(p);
+    int start = PNOW(p)->span.start;
+    int line = PNOW(p)->span.line;
+    parser_advance(p);
+    Expr *expr = parser_parse_expr(p);
+    if (expr->kind != TEXPR_EXPRIDENT) {
+      tix_error(expr->span, "Expression is not asignable", p->source, NULL);
+    }
+    int end = PNOW(p)->span.start;
+    Expr *preinc = create_preinc(
+        op, expr, (Span){.start = start, .end = end, .line = line});
+    return preinc;
   } break;
   default:
     tix_error(PNOW(p)->span, "Invalid Expr", p->source, NULL);
@@ -226,6 +248,10 @@ Item *parser_parse_extern(TParser *p) {
 Item *parser_function(TParser *p) {
   Item *func_stmt = (Item *)malloc(sizeof(Item));
   Span span = PNOW(p)->span;
+  if (PNOWB(p)->kind == TDOC) {
+    const Token *doc = PNOWB(p);
+    func_stmt->fn.Doc = doc;
+  }
   parser_advance(p); // skip 'fn' keyword
   char *name = malloc(64);
   name = strdup(parser_expect_ident(p));

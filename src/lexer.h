@@ -6,7 +6,9 @@
 
 enum TokenKind {
   TADD,
+  TADDADD,
   TSUB,
+  TSUBSUB,
   TMUL,
   TDIV,
   TI32,
@@ -43,6 +45,8 @@ enum TokenKind {
   TIDENT,
   TLET,
   TCOMMA,
+  TDOC,
+  TMULC, // multi line comments
 };
 
 typedef struct {
@@ -55,7 +59,7 @@ typedef struct {
   int line;
   Span span;
   enum TokenKind kind;
-  char *data;
+  const char *data;
 } Token;
 
 typedef struct TLexer {
@@ -76,7 +80,7 @@ Token tix_lexer_next_token(TLexer *lexer);
 /* deallocates a lexer */
 void tix_lexer_free(TLexer *);
 /* debug prints a token */
-void tix_token_print(const Token *token);
+void print_token(Token token);
 /* frees a token */
 void tix_token_free(Token *);
 const char *token_tostr(enum TokenKind);

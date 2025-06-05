@@ -11,6 +11,8 @@
 typedef enum {
   TEXPR_BINEXPR,
   TEXPR_UNOPEXPR,
+  TEXPR_PREINCEXPR,
+  TEXPR_POSTINCEXPR,
   TEXPR_EXPRINT,
   TEXPR_EXPRIDENT,
   TEXPR_EXPRSTR,
@@ -101,6 +103,7 @@ struct FnStmt {
   list_Param *param;
   struct Type return_type;
   struct Stmt *body;
+  const Token *Doc;
 };
 struct StructStmt {
   const char *name;
@@ -160,4 +163,6 @@ Node *create_nodes(Stmt *s);
 Node *create_nodee(Expr *e);
 Expr *create_binop(enum TokenKind t, Expr *lhs, Expr *rhs);
 Expr *create_unop(enum TokenKind op, Expr *expr, Span span);
+Expr *create_postinc(enum TokenKind op, Expr *expr, Span span);
+Expr *create_preinc(enum TokenKind op, Expr *expr, Span span);
 #endif

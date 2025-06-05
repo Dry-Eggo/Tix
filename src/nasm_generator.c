@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static FILE *nasm_out;
+StringBuilder *nasm_out;
 static BuildOptions *buildOptions;
 static StringBuilder *bss;
 static StringBuilder *header;
@@ -30,6 +30,7 @@ typedef struct {
   StringBuilder *preamble, *result;
   bool is_initialized_expr;
   char *object_name; // strictly to pass ident awareness for function call
+  char *reg_name;
 } NASM64_ExprResult;
 NASM64_ExprResult *new_expr_result() {
   NASM64_ExprResult *res = NEW(NASM64_ExprResult);
@@ -39,6 +40,7 @@ NASM64_ExprResult *new_expr_result() {
   res->is_initialized_expr = false;
   res->object_name = (char *)malloc(64);
   res->ty.is_signed = false;
+  res->reg_name = NULL;
   return res;
 }
 typedef enum MovOpcode { MOVB, MOVD, MOVW, MOVSX, MOVZX, MOVQ } MovOpcode;
@@ -256,6 +258,7 @@ NASM64_ExprResult *NASM64_generate_function_call(NASM64_generator *gen,
       while (arg_i < arg_max) {
         NASM64_ExprResult *arg_res =
             NASM64_generate_expr(gen, list_Expr_get(call.args, arg_i), NULL);
+        printf("here\n");
         if (!Type_match(arg_res->ty,
                         list_Param_get(meta->parameters, arg_i)->type)) {
           printf("Not Param match\n");
@@ -264,8 +267,6 @@ NASM64_ExprResult *NASM64_generate_function_call(NASM64_generator *gen,
         if (reg_c < 6) {
           Type sib = list_Param_get(meta->parameters, arg_i)->type;
           const char *reg = NASM64_get_registerv(&reg_c);
-
-          printf("reg: %s\n", reg);
           MovOpcode mov =
               MovOpcode_get_movopcode(sib, arg_res->ty.is_signed, arg_res->ty);
           sbapp(res->preamble, "%s", arg_res->preamble->data);
@@ -297,6 +298,7 @@ NASM64_ExprResult *NASM64_generate_expr(NASM64_generator *gen,
     SB_set(res->result, "%d", (int)i);
     res->ty = Type_create_i32();
     res->is_initialized_expr = true;
+    SB_set(res->opsize, "dword");
     return res;
   } break;
   case TEXPR_EXPRSTR: {
@@ -324,7 +326,9 @@ NASM64_ExprResult *NASM64_generate_expr(NASM64_generator *gen,
         return res;
       }
     }
-    TIX_LOG(stderr, ERROR, "Use of undeclared variable '%s'", name);
+    char buf[64] = {0};
+    sprintf(buf, "Use of undeclared variable '%s'", name);
+    tix_error(expr->span, buf, Source, NULL);
     exit(1);
   } break;
   case TEXPR_BINEXPR: {
@@ -332,22 +336,58 @@ NASM64_ExprResult *NASM64_generate_expr(NASM64_generator *gen,
     NASM64_ExprResult *res = new_expr_result();
     NASM64_ExprResult *lhs_r = NASM64_generate_expr(gen, bexpr.lhs, stream);
     NASM64_ExprResult *rhs_r = NASM64_generate_expr(gen, bexpr.rhs, stream);
+    if (bexpr.lhs->kind == TEXPR_EXPRINT && bexpr.rhs->kind == TEXPR_EXPRINT) {
+      int lhs_v = bexpr.lhs->int_value;
+      int rhs_v = bexpr.rhs->int_value;
+      if (bexpr.op == TADD) {
+        SB_set(res->result, "%d", lhs_v + rhs_v);
+      } else if (bexpr.op == TSUB) {
+        SB_set(res->result, "%d", lhs_v - rhs_v);
+      } else if (bexpr.op == TMUL) {
+        SB_set(res->result, "%d", lhs_v * rhs_v);
+      } else if (bexpr.op == TDIV) {
+        if (rhs_v == 0)
+          SB_set(res->result, "%d", 0);
+        else
+          SB_set(res->result, "%d", lhs_v / rhs_v);
+      }
+      res->is_initialized_expr = true;
+      res->ty = Type_create_i32();
+      SB_set(res->opsize, "dword");
+      return res;
+    }
     if (lhs_r->preamble) {
-      sbapp(res->preamble, "%s", lhs_r->preamble);
+      sbapp(res->preamble, "%s", lhs_r->preamble->data);
     }
     if (rhs_r->preamble) {
-      sbapp(res->preamble, "%s", rhs_r->preamble);
+      sbapp(res->preamble, "%s", rhs_r->preamble->data);
     }
     switch (bexpr.op) {
     case TADD: {
       sbapp(res->preamble, "\n    mov eax, %s", lhs_r->result->data);
-      sbapp(res->preamble, "\n    push eax");
+      sbapp(res->preamble, "\n    push rax");
       sbapp(res->preamble, "\n    mov ebx, %s", rhs_r->result->data);
-      sbapp(res->preamble, "\n    pop eax");
+      sbapp(res->preamble, "\n    pop rax");
       sbapp(res->preamble, "\n    add eax, ebx\n");
       res->ty = Type_create_i32();
     } break;
-
+    case TSUB:
+      sbapp(res->preamble, "\n    mov eax, %s", lhs_r->result->data);
+      sbapp(res->preamble, "\n    push rax");
+      sbapp(res->preamble, "\n    mov ebx, %s", rhs_r->result->data);
+      sbapp(res->preamble, "\n    pop rax");
+      sbapp(res->preamble, "\n    sub eax, ebx\n");
+      res->ty = Type_create_i32();
+      break;
+    case TMUL: {
+      sbapp(res->preamble, "\n    mov eax, %s", lhs_r->result->data);
+      sbapp(res->preamble, "\n    push rax");
+      sbapp(res->preamble, "\n    mov ebx, %s", rhs_r->result->data);
+      sbapp(res->preamble, "\n    pop rax");
+      sbapp(res->preamble, "\n    imul eax, ebx\n");
+      res->ty = Type_create_i32();
+      res->reg_name = "rax";
+    } break;
     default:
       break;
     }
@@ -386,9 +426,71 @@ NASM64_ExprResult *NASM64_generate_expr(NASM64_generator *gen,
     NASM64_ExprResult *res = NASM64_generate_function_call(gen, expr->call);
     return res;
   } break;
+  case TEXPR_PREINCEXPR: {
+    NASM64_ExprResult *res = new_expr_result();
+    NASM64_ExprResult *expr_r =
+        NASM64_generate_expr(gen, expr->unop.expr, NULL);
+    switch (expr->unop.op) {
+    case TADDADD: {
+      sbapp(res->preamble, "\n    mov eax, dword  %s", expr_r->result->data);
+      sbapp(res->preamble, "\n    inc rax");
+      sbapp(res->preamble, "\n    mov %s, rax", expr_r->result->data);
+      SB_set(res->result, "rax");
+      SB_set(res->opsize, "dword");
+      res->is_initialized_expr = true;
+      res->reg_name = "eax";
+      res->ty = Type_create_i32();
+      return res;
+    } break;
+    case TSUBSUB: {
+      sbapp(res->preamble, "\n    mov eax, dword  %s", expr_r->result->data);
+      sbapp(res->preamble, "\n    dec rax");
+      sbapp(res->preamble, "\n    mov %s, rax", expr_r->result->data);
+      SB_set(res->result, "rax");
+      SB_set(res->opsize, "dword");
+      res->is_initialized_expr = true;
+      res->reg_name = "eax";
+      res->ty = Type_create_i32();
+      return res;
+    } break;
+    default:
+      tix_error(expr->span, "Invalid Increment", Source, NULL);
+    }
+  } break;
+  case TEXPR_POSTINCEXPR: {
+    NASM64_ExprResult *res = new_expr_result();
+    NASM64_ExprResult *expr_r =
+        NASM64_generate_expr(gen, expr->unop.expr, NULL);
+    switch (expr->unop.op) {
+    case TADDADD: {
+      sbapp(res->preamble, "\n    mov ebx, dword  %s", expr_r->result->data);
+      sbapp(res->preamble, "\n    mov eax, ebx");
+      sbapp(res->preamble, "\n    inc rax");
+      sbapp(res->preamble, "\n    mov %s, rax", expr_r->result->data);
+      SB_set(res->result, "ebx");
+      SB_set(res->opsize, "dword");
+      res->is_initialized_expr = true;
+      res->ty = Type_create_i32();
+      res->reg_name = "eax";
+      return res;
+    } break;
+    case TSUBSUB: {
+      sbapp(res->preamble, "\n    mov eax, dword  %s", expr_r->result->data);
+      sbapp(res->preamble, "\n    dec rax");
+      sbapp(res->preamble, "\n    mov %s, rax", expr_r->result->data);
+      res->result = expr_r->result;
+      SB_set(res->opsize, "dword");
+      res->is_initialized_expr = true;
+      res->ty = Type_create_i32();
+      res->reg_name = "eax";
+      return res;
+    } break;
+    default:
+      tix_error(expr->span, "Invalid Increment", Source, NULL);
+    }
+  } break;
   default:
-    TIX_LOG(stderr, ERROR, "Invalid Expression");
-    exit(1);
+    tix_error(expr->span, "Invalid Expression", Source, NULL);
   }
 }
 void NASM64_generate_let(NASM64_generator *gen, struct LetStmt *letstmt,
@@ -415,7 +517,6 @@ void NASM64_generate_let(NASM64_generator *gen, struct LetStmt *letstmt,
       exit(1);
     }
     MovOpcode mov = MovOpcode_get_movopcode(letstmt->type, false, res->ty);
-    // MovOpcode mov = MOVQ;
     char *opsize = "";
     if (res->preamble) {
       tstrcatf(stream, "\n%s", res->preamble->data);
@@ -424,7 +525,8 @@ void NASM64_generate_let(NASM64_generator *gen, struct LetStmt *letstmt,
       opsize = res->opsize->data;
     }
 
-    tstrcatf(stream, "\n    mov %s [rbp - %d], %s", opsize, offset, res->result->data);
+    tstrcatf(stream, "\n    mov %s [rbp - %d], %s", opsize, offset,
+             res->result->data);
     sym->is_init = true;
   } else {
     sym->is_init = false;
@@ -468,7 +570,7 @@ void NASM64_generate_function(NASM64_generator *gen, struct FnStmt *fn) {
     function_name = fn->name;
   }
   if (is_extern)
-    NASM("\nextern t_main");
+    NASM("\nextern %s", function_name);
   if (!NASM64_is_free_symbol_identifier(gen, function_name)) {
     TIX_LOG(stderr, ERROR, "Redefinition of symbol'%s'", function_name);
     exit(1);
@@ -511,17 +613,17 @@ void NASM64_generate_extrn(NASM64_generator *gen, struct ExternStmt ex) {
   }
 }
 void NASM64_deinit(NASM64_generator *g) {
-  nasm_out = fopen(buildOptions->outputfile, "w");
-  fprintf(nasm_out,
-          "; ------ this file was generated by the Tix compiler -----\n");
-  fprintf(nasm_out, "%s", header->data);
-  fprintf(nasm_out, "\nsection .data");
-  fprintf(nasm_out, "%s", data->data);
-  fprintf(nasm_out, "\nsection .text");
-  fprintf(nasm_out, "%s", text->data);
-  fprintf(nasm_out, "\nsection .bss");
-  fprintf(nasm_out, "\nsection .rodata");
-  fprintf(nasm_out, "\nsection .note.GNU-stack");
+  SB_init(&nasm_out);
+  sbapp(nasm_out,
+        "; ------ this file was generated by the Tix compiler -----\n");
+  sbapp(nasm_out, "%s", header->data);
+  sbapp(nasm_out, "\nsection .data");
+  sbapp(nasm_out, "%s", data->data);
+  sbapp(nasm_out, "\nsection .text");
+  sbapp(nasm_out, "%s", text->data);
+  sbapp(nasm_out, "\nsection .bss");
+  sbapp(nasm_out, "\nsection .rodata");
+  sbapp(nasm_out, "\nsection .note.GNU-stack");
   SB_free(header);
   SB_free(text);
   SB_free(data);
