@@ -2,6 +2,7 @@
 
 #include "build/build_opt.h"
 #include "context.h"
+#include "ir/nero.h"
 #include "lists/lists.h"
 #include "node.h"
 #include "symbol.h"
@@ -15,7 +16,7 @@ typedef struct NASM64_Function_Meta {
 
 TIX_DYN_LIST(NASM64_Function_Meta, NASM64_Function_Meta)
 typedef struct {
-  Program program;
+  list_NERO_Inst* program;
   int rsp_loc;
   int current_offset;
   bool track_rsp_allocations;
@@ -26,6 +27,7 @@ typedef struct {
   int temp_counter;
 } NASM64_generator;
 
-void NASM64_init(NASM64_generator **, Program, char **, BuildOptions *);
+void nasm_compile(list_NERO_Inst* program, char** source, BuildOptions* opts);
+void NASM64_init(NASM64_generator **, list_NERO_Inst*, char **, BuildOptions *);
 void NASM64_generate(NASM64_generator *);
 void NASM64_deinit(NASM64_generator *);

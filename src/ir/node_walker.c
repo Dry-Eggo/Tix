@@ -1,112 +1,142 @@
+#include "nero.h"
 #include "../internals.h"
-#include "ir_gen.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-static char **source;
-typedef struct {
-  Type ty;
-  TIR_Value *value;
-} Expr_result;
-void Node_init(Node_Walker *n, Program *p) {
-  n->program = p;
-  n->list = (IR_list *)malloc(sizeof(IR_list));
-  n->list->insts = (TIR_Instruction **)malloc(64 * 8);
-  n->list->cap = 64;
-  n->list->count = 0;
-  n->max = p->count;
-  n->pos = 0;
-}
-void Node_parse_stmt(Stmt *, TIR_Block **);
-void Node_parse_let_stmt(Stmt *, TIR_Block **);
-Expr_result Node_parse_expr(Expr *);
-void Node_set_source(char **s) { source = s; }
-Node *Node_next(Node_Walker *n) {
-  if (n->pos >= n->max)
-    return NULL;
-  return n->program->nodes[n->pos++];
-}
-void Node_parse_block(Stmt *stmt, TIR_Block **context) {
-  list_Stmt *blockstmt = stmt->stmt.statements;
-  int max = blockstmt->count;
-  int inx = 0;
-  while (inx < max) {
-    Stmt *stmt = list_Stmt_get(blockstmt, inx);
-    Node_parse_stmt(stmt, context);
-    inx++;
-  }
-}
 
-void Node_parse_stmt(Stmt *stmt, TIR_Block **context) {
-  switch (stmt->kind) {
-  case TSTMT_LET:
-    Node_parse_let_stmt(stmt, context);
-    return;
-  default:
-    tix_error(stmt->span, "Invalide Stmt", source, NULL);
-  }
-}
-
-void Node_parse_let_stmt(Stmt *stmt, TIR_Block **context) {
-  struct LetStmt *letstmt = &stmt->stmt.letstmt;
-  TIR_Value *v;
-  Expr_result ty = Node_parse_expr(letstmt->init);
-  IR_Value(&v, letstmt->name, IR_Type_from_type(&ty.ty), ty.value, context);
-  IR_Value_Store(&v, context);
-}
-
-Expr_result Node_parse_expr(Expr *expr) {
-  Type ty;
-  switch (expr->kind) {
-  case TEXPR_EXPRINT: {
-    return (Expr_result){.ty = TTYPE_I32,
-                         IR_Value_Get_Constant_I32(expr->int_value)};
-  }
-  default:
-    break;
-  }
-  return (Expr_result){.ty = ty, .value = NULL};
-}
-void Node_parse_fn(Item *item) {
-  const char *function_name = item->fn.name;
-  typeof(item->fn) function = item->fn;
-  TIR_Function *fn;
-  TIR_Module *m = IR_Get_mainmodule();
-  TIR_Block *context;
-  IR_Block(&context, "entry", NULL);
-  if (function.body) {
-    Node_parse_block(function.body, &context);
-  }
-  if (!m) {
-    TIX_LOG(stderr, ERROR, "Main Module is null");
-  }
-  IR_Function(&fn, &m, function_name, context,
-              IR_Type_from_type(&item->fn.return_type));
-}
-void Node_add_inst(Node_Walker *n, TIR_Instruction *i) {
-  IR_list_add(n->list, i);
-}
-void Node_parse_item(Item *item) {
-  switch (item->kind) {
-  case ITEM_FN: {
-    Node_parse_fn(item);
-  } break;
-  default:
-    printf("Invalid Item\n");
-    exit(1);
-  }
-}
-
-void Node_generate(Node_Walker *n) {
-  while (n->pos < n->max) {
-    Node *node = Node_next(n);
-    switch (node->type) {
-    case TNODE_ITEM: {
-      Node_parse_item(node->node.item);
+list_NERO_Inst* Nero_parse(Program *program);
+const char* NERO_DEBUG(NERO_Inst* inst) {
+  switch (inst->opcode) {
+    case NERO_OP_CONST:{
+      char buf[12] = {0};
+      sprintf(buf, "%d", inst->src->val.constant_value->value);
+      return strdup(buf);
     } break;
     default:
-      printf("Invalid Ast\n");
-      exit(1);
+      return "<>";
+  }
+  return NULL;
+}
+
+NERO_Inst* NERO_parse_expr(Expr* expr) {
+  NERO_Inst* inst = NEW(NERO_Inst);
+  switch (expr->kind) {
+    case TEXPR_EXPRINT:
+      inst->opcode = NERO_OP_CONST;
+      inst->src = NeroInt(NERO_new_const(expr->int_value));
+      break;
+    default:
+      break;
+  }
+  return inst;
+}
+
+list_NERO_Inst* NERO_parse_body(Stmt* body) {
+  list_NERO_Inst* insts;
+  list_NERO_Inst_init(&insts);
+  if (body) {
+      int max = body->stmt.statements->count;
+      int i = 0;
+      printf("        Body:\n");
+      while (i < max) {
+	  Stmt* stmt = list_Stmt_get(body->stmt.statements, i);
+	  switch (stmt->kind) {
+	  case TSTMT_LET:{
+              NERO_Inst* inst = NEW(NERO_Inst);
+              struct LetStmt ls = stmt->stmt.letstmt;
+              const char* name = ls.name;
+              const char* type = Type_toraw(&ls.type);
+              printf("        STORE %s %s: ", name, type);
+              NERO_Inst* expr_value = NERO_parse_expr(ls.init);
+              printf("%s\n", NERO_DEBUG(expr_value));
+              inst->opcode = NERO_OP_STORE;
+	      NERO_Store* storage = NEW(NERO_Store);
+	      storage->label = name;
+              storage->value = expr_value;
+	      inst->src = NERO_Value_from_storage(storage);
+              list_NERO_Inst_add(insts, inst);
+	  } break;
+          default:
+            break;
+	}
+	i++;
     }
   }
+  return insts;
+}
+
+NERO_Inst* NERO_parse_fn(struct FnStmt fn) {
+    NERO_Inst* inst = NEW(NERO_Inst);   
+    inst->opcode = NERO_OP_FUNCTION;
+    printf("    Function: %s\n", fn.name);
+    list_NERO_Inst* insts = NERO_parse_body(fn.body);
+    NERO_Function *f = NEW(NERO_Function);
+    
+    f->name=  fn.name;
+    f->insts = insts->data;
+    f->size =  insts->count;
+    int param_count = fn.param->count;
+    NERO_Arg** args = malloc(param_count*sizeof(NERO_Arg));
+    int i = 0;
+    while(i < param_count) {
+	NERO_Arg* arg = NEW(NERO_Arg);
+	Param* param = list_Param_get(fn.param, i);
+	arg->name = param->name;
+	arg->type = param->type;
+	args[i] = arg;
+	i++;
+    }
+    f->arguments = args;
+    f->argc = param_count;
+    inst->src = NERO_Value_from_fn(f);
+    printf("    Function End\n");
+    return inst;
+}
+
+NERO_Inst* NERO_parse_item(Item* item) {
+  NERO_Inst* inst = NEW(NERO_Inst);
+  switch(item->kind) {
+  case ITEM_FN:{
+	inst = NERO_parse_fn(item->fn);
+    } break;
+    case ITEM_EXTRN:{
+	NERO_Declare* extrn = NEW(NERO_Declare);
+        inst->opcode = NERO_OP_DECLARE;
+        printf("    Extern: %s\n", item->extrn.symbol.fn.name);
+	
+	switch(item->extrn.kind) {
+	case EXTERN_FN:
+	    extrn->type  = NERO_DECLARE_FUNCTION;
+	    extrn->value = NERO_parse_fn(item->extrn.symbol.fn);
+	    inst->src    = NERO_Value_from_declaration(extrn);
+	    break;
+	default:
+	    break;
+	}
+    } break;
+    default:
+      break;
+  }
+  return inst;
+}
+
+list_NERO_Inst* Nero_parse(Program *program) {
+  list_NERO_Inst* insts;
+  list_NERO_Inst_init(&insts);
+  int max = program->count;
+  int i = 0;
+  while (i < max) {
+    Node* node = program->nodes[i];
+    switch (node->type) {
+      case TNODE_ITEM:
+        printf("Top level item\n");
+        list_NERO_Inst_add(insts, NERO_parse_item(node->node.item));
+        break;
+      default:
+        printf("Unexpected Node\n");
+        break;
+    }
+    i++;
+  }
+  return insts;
 }

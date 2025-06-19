@@ -78,6 +78,7 @@ typedef struct Stmt {
 TIX_DYN_LIST(Stmt, Stmt);
 typedef enum {
   ITEM_FN,
+  ITEM_EXTRN_FN,
   ITEM_STRUCT,
   ITEM_TYPEDEF,
   ITEM_IMPORT,

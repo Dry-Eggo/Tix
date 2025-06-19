@@ -1,7 +1,9 @@
 #include "src/build/build_opt.h"
 #include "src/internals.h"
+#include "src/ir/nero.h"
 #include "src/lexer.h"
 #include "src/nasm_generator.h"
+#include "src/qbe.h"
 #include "src/node.h"
 #include "src/parser.h"
 #include "src/string_builder.h"
@@ -46,7 +48,7 @@ extern void print_usage(const char *program) {
 bool TIX_DEBUG_ENABLED;
 int main(int argc, char **argv) {
   TIX_DEBUG_ENABLED = false;
-  BuildOptions bld = {.show_help = false, .show_version = false};
+  BuildOptions bld = {.show_help = false, .show_version = false, .target = QBE};
   parse_arguments(&bld, argc, argv);
   TIX_DEBUG_ENABLED = bld.verbose;
   if (bld.show_help && !bld.help_target) {
@@ -79,62 +81,17 @@ int main(int argc, char **argv) {
   program_init(&pr);
   parser_init(&p, &tokens);
   parser_parse(&p, &pr);
-  NASM64_generator *gen;
-  NASM64_init(&gen, pr, p.source, &bld);
-  NASM64_generate(gen);
-  NASM64_deinit(gen);
-  // TODO: tidy this mess
-  extern StringBuilder *nasm_out;
-  switch (bld.stage) {
-  case ASM: {
-    char path[128] = {0};
-    sprintf(path, "%s.s", bld.outputfile);
-    FILE *s = fopen(path, "w");
-    fprintf(s, "%s", nasm_out->data);
-    fclose(s);
-    TIX_LOG(stdout, Finished, "Output: '%s.s'", bld.outputfile);
-    return EXIT_SUCCESS;
-  }
-  case OBJ: {
-    char path[128] = {0};
-    sprintf(path, "%s.s", bld.outputfile);
-    FILE *s = fopen(path, "w");
-    fprintf(s, "%s", nasm_out->data);
-    fclose(s);
-    StringBuilder *cmd;
-    SB_init(&cmd);
-    SB_set(cmd, "nasm -felf64 -g -dwarf %s.s -o %s.o", bld.outputfile,
-           bld.outputfile);
-    system(cmd->data);
-    SB_set(cmd, "rm %s.s", bld.outputfile, bld.outputfile);
-    system(cmd->data);
-    TIX_LOG(stdout, Finished, "Output: '%s.o'", bld.outputfile);
-    return EXIT_SUCCESS;
-  }
-  case EXE: {
-    char path[128] = {0};
-    sprintf(path, "%s.s", bld.outputfile);
-    FILE *s = fopen(path, "w");
-    fprintf(s, "%s", nasm_out->data);
-    fclose(s);
-    StringBuilder *cmd;
-    SB_init(&cmd);
-    SB_set(cmd, "nasm -felf64 -g -dwarf %s.s -o %s.o", bld.outputfile,
-           bld.outputfile);
-    int status = system(cmd->data);
-    if (WIFEXITED(status)) {
-      int code = WEXITSTATUS(status);
-      if (code != 0) {
-      TIX_LOG(stderr, ERROR, "Fatal Error during compilation");
-      exit(1);
-      }
-    }
-    SB_set(cmd, "ld %s.o libtix.a -o %s", bld.outputfile, bld.outputfile);
-    system(cmd->data);
-    SB_set(cmd, "rm %s.s %s.o", bld.outputfile, bld.outputfile);
-    system(cmd->data);
-    TIX_LOG(stdout, Finished, "Output: '%s'", bld.outputfile);
-    return EXIT_SUCCESS;
-  }
+
+  list_NERO_Inst* instructions = Nero_parse(&pr);
+  switch (bld.target) {
+  case x86_64:
+      printf("here\n");
+      nasm_compile(instructions, p.source, &bld);
+      break;
+  case QBE:
+      qbe_compile(instructions, p.source, &bld);
+      break;
+  default:
+      break;
   }
 }

@@ -94,7 +94,7 @@ Type parser_parse_type(TParser *p) {
     return Type_create_void();
   }
   default:
-    tix_error(PNOW(p)->span, "Unexpected type", p->source, NULL);
+    tix_error(PNOWB(p)->span, "Unexpected type", p->source, NULL);
     exit(1); /* shouldn't reach here */
   }
 }
@@ -214,7 +214,7 @@ Expr *parser_parse_atom(TParser *p) {
     int start = PNOW(p)->span.start;
     int line = PNOW(p)->span.line;
     parser_advance(p);
-    Expr *expr = parser_parse_expr(p);
+    Expr *expr = parser_parse_atom(p);
     if (expr->kind != TEXPR_EXPRIDENT) {
       tix_error(expr->span, "Expression is not asignable", p->source, NULL);
     }
@@ -295,15 +295,13 @@ Item *parser_function(TParser *p) {
 void parser_parse_parameter(TParser *p, Param **param) {
   *param = NEW(Param);
   const char *param_name = parser_expect_ident(p);
-  if (EQ(PNOWT(p), TCOL)) {
-    parser_expect(p, TCOL);
-    Type ty = parser_parse_type(p);
-    (*param)->type = ty;
-    if (EQ(PNOWT(p), TEQ)) {
-      parser_expect(p, TEQ);
-      Expr *param_initializer = parser_parse_expr(p);
-      (*param)->init = param_initializer;
-    }
+  parser_expect(p, TCOL);
+  Type ty = parser_parse_type(p);
+  (*param)->type = ty;
+  if (EQ(PNOWT(p), TEQ)) {
+    parser_expect(p, TEQ);
+    Expr *param_initializer = parser_parse_expr(p);
+    (*param)->init = param_initializer;
   }
   (*param)->name = param_name;
 }

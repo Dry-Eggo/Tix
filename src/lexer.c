@@ -85,7 +85,7 @@ Token lexer_integer(TLexer *lexer) {
 }
 
 static enum TokenKind token_iskeyword(const char *ident) {
-  if (strcmp(ident, "fn") == 0) {
+  if (strcmp(ident, "func") == 0) {
     return TFN;
   } else if (strcmp(ident, "int") == 0) {
     return TINT;
@@ -220,6 +220,9 @@ Token tix_lexer_next_token(TLexer *lexer) {
     case '=':
       lexer_advance(lexer);
       return create_token(TEQ, start_col, start_col, start_line, ":");
+    case ',':
+      lexer_advance(lexer);
+      return create_token(TCOMMA, start_col, start_col, start_line, ",");
     default:
     }
   }
