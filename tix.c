@@ -1,15 +1,10 @@
 #include "src/build/build_opt.h"
 #include "src/internals.h"
-#include "src/ir/nero.h"
-#include "src/lexer.h"
 #include "src/nasm_generator.h"
 #include "src/qbe.h"
-#include "src/node.h"
 #include "src/parser.h"
-#include "src/string_builder.h"
-#include "src/token_list.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "src/semantic.h"
+
 static const char *version = "v0.1.0";
 static ARGDef commands[] = {
     {"Available targets:\n\t* x86_64 nasm"},
@@ -45,53 +40,61 @@ extern void print_usage(const char *program) {
           "\n    -s            |                    Compile to assembly");
   fprintf(stdout, "\n");
 }
+
+
+
 bool TIX_DEBUG_ENABLED;
 int main(int argc, char **argv) {
-  TIX_DEBUG_ENABLED = false;
-  BuildOptions bld = {.show_help = false, .show_version = false, .target = QBE};
-  parse_arguments(&bld, argc, argv);
-  TIX_DEBUG_ENABLED = bld.verbose;
-  if (bld.show_help && !bld.help_target) {
-    print_usage(argv[0]);
-    exit(1);
-  } else if (bld.has_specialized_help_target) {
-    printf("%s\n", commands[bld.help_target].help);
-    exit(1);
-  }
-  if (bld.show_version) {
-    printf("version: %s\n", version);
-    exit(1);
-  }
-  TLexer lexer;
-  if (tix_lexer_init(&lexer, bld.inputfile) != 0) {
-    return EXIT_FAILURE;
-  }
-  Token token;
-  TokenList tokens = {0};
-  token_list_init(&tokens);
-  do {
-    token = tix_lexer_next_token(&lexer);
-    print_token(token);
-    token_list_add(&tokens, token);
-  } while (token.kind != TEOF);
-  TParser p;
-  stream_max = TString_cstr_to_cstr_array(lexer.stream, &p.source);
-
-  Program pr;
-  program_init(&pr);
-  parser_init(&p, &tokens);
-  parser_parse(&p, &pr);
-
-  list_NERO_Inst* instructions = Nero_parse(&pr);
-  switch (bld.target) {
-  case x86_64:
-      printf("here\n");
-      nasm_compile(instructions, p.source, &bld);
-      break;
-  case QBE:
-      qbe_compile(instructions, p.source, &bld);
-      break;
-  default:
-      break;
-  }
+    TIX_DEBUG_ENABLED = false;
+    BuildOptions bld = {.show_help = false, .show_version = false, .target = QBE};
+    parse_arguments(&bld, argc, argv);
+    TIX_DEBUG_ENABLED = bld.verbose;
+    if (bld.show_help && !bld.help_target) {
+	print_usage(argv[0]);
+	exit(1);
+    } else if (bld.has_specialized_help_target) {
+	printf("%s\n", commands[bld.help_target].help);
+	exit(1);
+    }
+    if (bld.show_version) {
+	printf("version: %s\n", version);
+	exit(1);
+    }
+    TLexer lexer;
+    if (tix_lexer_init(&lexer, bld.inputfile) != 0) {
+	return EXIT_FAILURE;
+    }
+    Token token;
+    TokenList tokens = {0};
+    token_list_init(&tokens);
+    do {
+	token = tix_lexer_next_token(&lexer);
+	print_token(token);
+	token_list_add(&tokens, token);
+    } while (token.kind != TEOF);
+    TParser p;
+    stream_max = TString_cstr_to_cstr_array(lexer.stream, &p.source);
+  
+    Program pr;
+    program_init(&pr);
+    parser_init(&p, &tokens);
+    parser_parse(&p, &pr);
+    
+    // Initialize Semantics
+    Semantic_State semantics;
+    Semantics_Init(&semantics);
+    Semantical_Analysis(&semantics, &pr, p.source, &bld);
+    
+    list_NERO_Inst* instructions = Nero_parse(&pr);
+    switch (bld.target) {
+    case x86_64:
+	printf("here\n");
+	nasm_compile(instructions, p.source, &bld);
+	break;
+    case QBE:
+	qbe_compile(instructions, p.source, &bld);
+	break;
+    default:
+	break;
+    }
 }

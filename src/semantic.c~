@@ -1,0 +1,8 @@
+#include "semantic.h"
+
+
+void Semantics_Init(Semantic_State* state) {
+    state = NEW(Semantic_State);
+    list_Semantic_Function_init(&state->functions);
+    list_Semantic_Variable_init(&state->variables);
+}

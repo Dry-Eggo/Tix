@@ -31,6 +31,7 @@ struct UnaryOp {
 };
 struct FCall {
   struct Expr *callee;
+
   struct list_Expr *args;
   size_t arg_count;
 };
@@ -38,12 +39,12 @@ typedef struct Expr {
   ExprKind kind;
   Span span;
   union {
-    int64_t int_value;
-    const char *string_value;
-    const char *ident_name;
-    struct BinOp binary_op;
-    struct UnaryOp unop;
-    struct FCall call;
+    int64_t           int_value;
+    const char*       string_value;
+    const char*       ident_name;
+    struct BinOp      binary_op;
+    struct UnaryOp    unop;
+    struct FCall      call;
   };
 } Expr;
 TIX_DYN_LIST(Expr, Expr)

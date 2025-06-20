@@ -5,7 +5,7 @@
 #include "node.h"
 #include "token_list.h"
 typedef struct {
-  TokenList *tokens;
+  TokenList* tokens;
   int pos;
   int max;
   char **source;
