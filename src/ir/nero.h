@@ -6,11 +6,16 @@
 // NERO:              Intermediate Representation of Tix source code
 
 typedef enum {
-  NERO_OP_CONST,                       // CONST 40
-  NERO_OP_STORE,                       // STORE %tmp, CONST 40
-  NERO_OP_FUNCTION,                    // func %main:...
-  NERO_OP_LOAD,                        // LOAD %dst, %source
-  NERO_OP_DECLARE,                     // DECLARE printf
+    NERO_OP_CONST,                       // CONST 40
+    NERO_OP_RES,
+    NERO_OP_STORE,                       // STORE %tmp, CONST 40
+    NERO_OP_FUNCTION,                    // func %main:...
+    NERO_OP_LOAD,                        // LOAD %dst, %source
+    NERO_OP_DECLARE,                     // DECLARE printf
+    NERO_OP_ADD,
+    NERO_OP_SUB,
+    NERO_OP_MUL,
+    NERO_OP_DIV,
 } NERO_Opcode;
 
 typedef enum {
@@ -55,10 +60,33 @@ typedef struct {
   int                     value;
 } NERO_Const;
 
+
+/* STORE Instruction stores a value provided to it in an address */
 typedef struct {
   const char*             label;
-  struct NERO_Inst*      value;
+  struct NERO_Inst*       value;
 } NERO_Store;
+/* LOAD Instruction is a version of STORE that stores a value in a non-memory location */
+typedef struct {
+  const char*             label;
+  struct NERO_Inst*       value;
+} NERO_Load;
+
+/* RES Instruction allocates memory for a variable on the stack */
+typedef struct {
+  const char*             label;
+  NERO_Type               size;
+} NERO_Res;
+
+typedef struct {
+    NERO_Opcode op;
+    struct NERO_Inst*           src;
+    struct NERO_Inst*           dst;
+} NERO_Ari;               // Arithmetics
+
+typedef struct {
+    const char*           label;
+} NERO_Label;
 
 typedef struct NERO_Value {
   NERO_Type               type;
@@ -67,6 +95,9 @@ typedef struct NERO_Value {
     NERO_Const*           constant_value;
     NERO_Declare*         declaration_value;
     NERO_Function *       function_value;
+    NERO_Ari*             ari_value;
+    NERO_Label*           label_value;
+    NERO_Res*             reserve;
   } val;
 } NERO_Value;
 
@@ -83,9 +114,11 @@ TIX_DYN_LIST(NERO_Inst, NERO_Inst);
 
 NERO_Inst*      NERO_make_inst(NERO_Opcode op, NERO_Value* src, NERO_Value* dst);
 NERO_Value*     NERO_Value_from_fn(NERO_Function* fn);
-NERO_Value*     NERO_Value_from_storage(NERO_Store* storage);
+NERO_Value*     NERO_Value_from_reserve(const char*, int);
+NERO_Value*     NERO_Value_from_storage(const char*, NERO_Inst*);
+NERO_Value*     NERO_Value_from_load(const char*, NERO_Inst*);
 NERO_Value*     NERO_Value_from_declaration(NERO_Declare* declaration);
-NERO_Value      NeroNull();
+NERO_Value*     NeroNull();
 NERO_Value*     NeroInt(NERO_Const* i);
 NERO_Const*     NERO_new_const(int i);
 list_NERO_Inst* Nero_parse(Program *program);

@@ -21,11 +21,21 @@ const char* NERO_DEBUG(NERO_Inst* inst) {
 NERO_Inst* NERO_parse_expr(Expr* expr) {
   NERO_Inst* inst = NEW(NERO_Inst);
   switch (expr->kind) {
-    case TEXPR_EXPRINT:
+  case TEXPR_EXPRINT:
       inst->opcode = NERO_OP_CONST;
       inst->src = NeroInt(NERO_new_const(expr->int_value));
       break;
-    default:
+  case TEXPR_BINEXPR:
+      // derive:     let num: i32 = 1 + 1;
+      // RES %num, DWORD
+      // LOAD %tmp, 1
+      // ADD %tmp, 1
+      // STORE %num, %tmp
+      const char* tmp = "%tmp";
+      NERO_Inst* lhs = NERO_parse_expr(expr->binary_op.lhs);
+      NERO_Inst* load = NERO_make_inst(NERO_OP_LOAD, NERO_Value_from_load(tmp, lhs), NeroNull());
+      break;
+  default:
       break;
   }
   return inst;
@@ -42,19 +52,14 @@ list_NERO_Inst* NERO_parse_body(Stmt* body) {
 	  Stmt* stmt = list_Stmt_get(body->stmt.statements, i);
 	  switch (stmt->kind) {
 	  case TSTMT_LET:{
-              NERO_Inst* inst = NEW(NERO_Inst);
               struct LetStmt ls = stmt->stmt.letstmt;
+	      NERO_Inst* reserve = NERO_make_inst(NERO_OP_RES, NERO_Value_from_reserve(ls.name, ls.type.size_in_bytes), NeroNull());
+	      NERO_Inst* store   = NERO_make_inst(NERO_OP_STORE, NERO_Value_from_storage(ls.name, NERO_parse_expr(ls.init)), NeroNull());
               const char* name = ls.name;
               const char* type = Type_toraw(&ls.type);
-              printf("        STORE %s %s: ", name, type);
-              NERO_Inst* expr_value = NERO_parse_expr(ls.init);
-              printf("%s\n", NERO_DEBUG(expr_value));
-              inst->opcode = NERO_OP_STORE;
-	      NERO_Store* storage = NEW(NERO_Store);
-	      storage->label = name;
-              storage->value = expr_value;
-	      inst->src = NERO_Value_from_storage(storage);
-              list_NERO_Inst_add(insts, inst);
+              printf("        STORE %s %s\n", name, type);
+              list_NERO_Inst_add(insts, reserve);
+	      list_NERO_Inst_add(insts, store);
 	  } break;
           default:
             break;

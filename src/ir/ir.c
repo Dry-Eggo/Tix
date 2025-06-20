@@ -29,11 +29,11 @@ NERO_Value* NERO_Value_from_declaration(NERO_Declare* d) {
     return value;
 }
 
-NERO_Value* NERO_Value_from_storage(NERO_Store* s) {
-    NERO_Value* value = NEW(NERO_Value);
-    value->val.storage_value = s;
-    return value;
-}
+//NERO_Value* NERO_Value_from_storage(NERO_Store* s) {
+//    NERO_Value* value = NEW(NERO_Value);
+//    value->val.storage_value = s;
+//    return value;
+//}
 
 NERO_Const* NERO_new_const(int i) {
     NERO_Const* cons = NEW(NERO_Const);

@@ -9,7 +9,14 @@ typedef struct {
     NERO_Arg**        args;
     int               argc;
 } Qbe_Function;
+
+typedef struct {
+    const char* name;
+    Type type;
+} Qbe_Variable;
+
 TIX_DYN_LIST(Qbe_Function, Qbe_Function);
+TIX_DYN_LIST(Qbe_Variable, Qbe_Variable);
 typedef struct {
     list_NERO_Inst*     program;
     list_Qbe_Function*  functions;
