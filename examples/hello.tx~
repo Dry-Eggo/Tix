@@ -1,8 +1,0 @@
-
-extrn fn tputs(msg: *u8) void;
-extrn fn tput_i(n:i32) void;
-
-fn main() {
-	let bar : i32 = -60;
-	tput_i(bar);
-}

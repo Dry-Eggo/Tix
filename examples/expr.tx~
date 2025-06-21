@@ -1,8 +1,0 @@
-
-extrn func tput_i(n: i32) void;
-extrn func tputs(msg: *u8) void;
-
-func main() {
-    let num:  i32 = 50 + 6;
-    let num2: i32 = 40;
-}
