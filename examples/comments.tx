@@ -1,0 +1,12 @@
+
+/* this is a multi line comment */
+
+// single line comment
+
+/- This is
+   	a Doc comment -/
+fn main() {
+}
+
+fn foo () {
+}

@@ -1,0 +1,13 @@
+
+extrn func tput_i(n: i32)   void;
+extrn func tputs (msg: *u8) void;
+
+func foo (a: i32) {
+     tput_i(50);
+}
+
+func main() {
+    let num :  i32 = 50 + 2;
+    let num2:  i32 = 40;
+    tput_i(num);
+}

@@ -1,0 +1,12 @@
+
+ 
+extrn fn tput_i(n: i32) void;
+extrn fn tputs(msg: *u8) void;
+
+func foo (a: i32) i32 {
+}
+
+func main() {
+    let num i32 = (30 * 40);
+    foo();
+}
